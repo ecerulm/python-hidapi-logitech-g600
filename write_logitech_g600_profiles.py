@@ -497,9 +497,12 @@ profile1.color = (255, 0, 0)
 profile1.gshift_color = (0, 255, 255)
 profile1.frequency = 125
 
+
+
+
 profile2 = LogitechG600Profile(1)
 profile2.color = (0, 255, 0)
-profile2.gshift_color = (255, 0, 255)
+profile2.gshift_color = (255, 1, 255)
 
 profile3 = LogitechG600Profile(2)
 profile3.color = (0, 0, 255)
@@ -535,7 +538,7 @@ rc = h.send_feature_report(profile2.feature_report())
 if rc == -1:
     print("error writing profile 2. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
     sys.exit()
-print("Successfully wrote profile 1 (%d) bytes" % rc)
+print("Successfully wrote profile 2 (%d) bytes" % rc)
 
 print("writing profile 3")
 rc = h.send_feature_report(profile3.feature_report())
