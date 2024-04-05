@@ -14,11 +14,17 @@ class LogitechG600Profile:
     LEFT_SHIFT: int = 0x02
     LEFT_ALT: int = 0x04
     LEFT_META: int = 0x08
+    LEFT_GUI: int = 0x08
+    LEFT_CMD: int = 0x08
     RIGHT_CTRL: int = 0x10
     RIGHT_SHIFT: int = 0x20
     RIGHT_ALT: int = 0x40
     RIGHT_META: int = 0x80
-    HYPER = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_META
+    RIGHT_GUI: int = 0x80
+    RIGHT_CMD: int = 0x80
+
+    HYPER = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_GUI
+    MEH = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT
 
     NAME_TO_CODE_MODIFIER_KEY = {
         "BUTTON_1": (0x01, 0x00, 0x00),
@@ -497,8 +503,37 @@ profile1.color = (255, 0, 0)
 profile1.gshift_color = (0, 255, 255)
 profile1.frequency = 125
 
+profile1.set_button("g4", 0, 0, 0x81)  # keyboard volume down
+profile1.set_button("g5", 0, 0, 0x80)  # keyboard volume up
 
+profile1.set_button("g9", 0, LogitechG600Profile.HYPER, 0x1e) # hyper + 1 / Keyboard Maestro trigger screencapture -ic
+profile1.set_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x06) # Cmd + v (copy)
+profile1.set_button("g11", 0, LogitechG600Profile.RIGHT_CMD|LogitechG600Profile.RIGHT_SHIFT, 0x19) # Cmd + shift + v (Paste without formating)
+profile1.set_button("g12", 0, LogitechG600Profile.HYPER, 0x21) # hyper + 4
+profile1.set_button("g13", 0, LogitechG600Profile.HYPER, 0x22) # hyper + 5
+profile1.set_button("g14", 0, LogitechG600Profile.HYPER, 0x23) # hyper + 6
+profile1.set_button("g15", 0, LogitechG600Profile.HYPER, 0x24) # hyper + 7
+profile1.set_button("g16", 0, LogitechG600Profile.HYPER, 0x25) # hyper + 8
+profile1.set_button("g17", 0, LogitechG600Profile.HYPER, 0x26) # hyper + 9
+profile1.set_button("g18", 0, LogitechG600Profile.HYPER, 0x27) # hyper + 0
+profile1.set_button("g19", 0, LogitechG600Profile.HYPER, 0x2d) # hyper + -
+profile1.set_button("g20", 0, LogitechG600Profile.HYPER, 0x2e) # hyper + =
+profile1.set_gshift_button("g9", 0, LogitechG600Profile.MEH, 0x1e) # meh + 1
+profile1.set_gshift_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x05) # Cmd + b (bold)
+profile1.set_gshift_button("g11", 0, LogitechG600Profile.MEH, 0x20) # meh + 3
+profile1.set_gshift_button("g12", 0, LogitechG600Profile.MEH, 0x21) # meh + 4
+profile1.set_gshift_button("g13", 0, LogitechG600Profile.MEH, 0x22) # meh + 5
+profile1.set_gshift_button("g14", 0, LogitechG600Profile.MEH, 0x23) # meh + 6
+profile1.set_gshift_button("g15", 0, LogitechG600Profile.MEH, 0x24) # meh + 7
+profile1.set_gshift_button("g16", 0, LogitechG600Profile.MEH, 0x25) # meh + 8
+profile1.set_gshift_button("g17", 0, LogitechG600Profile.MEH, 0x26) # meh + 9
+profile1.set_gshift_button("g18", 0, LogitechG600Profile.MEH, 0x27) # meh + 0
+profile1.set_gshift_button("g19", 0, LogitechG600Profile.MEH, 0x2d) # meh + -
+profile1.set_gshift_button("g20", 0, LogitechG600Profile.MEH, 0x2e) # meh + =
 
+# profile1.dpi_shift = 8200
+# profile1.set_button("G9", 0, 0, 0x04)
+# print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
 profile2.color = (0, 255, 0)

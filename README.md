@@ -88,21 +88,33 @@ the key mappings are (code, modifier, key):
     * 0x01 left_ctrl
     * 0x02 left_shift
     * 0x04 left_alt
-    * 0x08 left_gui
+    * 0x08 left_gui / windows key / command key/ meta key
     * 0x10 right_ctrl
     * 0x20 right_shift
     * 0x40 right_alt
-    * 0x80 right_gui
+    * 0x80 right_gui / windows key / command key / meta key
   * key is the key code according to the USB HID Usage Tables for USB / Keyboard/Keypad Page 0x07
     * 0x04 a
     * ...
+    * 0x13 p
+    * ...
+    * 0x19 v
     * 0x1D z
     * 0x1E 1
     * ...
     * 0x27 0
-    * 0x2d - minus dash
-    * 0x2e = equal
-    * 0x7f mute (keyboard mute key)
+    * 0x2D - minus dash
+    * 0x2E = equal
+    * ...
+    * 0x3A F1
+    * ...
+    * 0x45 F12
+    * ...
+    * 0x68 F13
+    * ...
+    * 0x73 F24
+    * ...
+    * 0x7F mute (keyboard mute key)
     * 0x80 volume_up (keyboard volume up key)
     * 0x81 volume_down (keyboard volume down key)
 * code 0x01 means that it's mouse button1 (left mouse click)
