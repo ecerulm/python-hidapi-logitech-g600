@@ -123,7 +123,11 @@ the key mappings are (code, modifier, key):
 
 # How to run
 
+You need to give your terminal application the "Input Monitoring" permission via
+System Preferences -> Security & Privacy -> Privacy -> Input Monitoring
+
 ```
+brew install hidapi
 pyenv virtualenv 3.12 g600
 source $(pyenv prefix g600)/bin/activate
 pip install -U pip
@@ -132,3 +136,5 @@ sudo python write_logitech_g600_profiles.py
 ```
 
 You need to run as sudo, you can't send HID feature reports without root access in macOS at least.
+
+You may need to run the script multiple times to get the mouse to accept the new profile.

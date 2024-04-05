@@ -1,5 +1,6 @@
 import hid
 import sys
+import time
 
 
 class LogitechG600Profile:
@@ -497,7 +498,7 @@ profile1.gshift_color = (0, 255, 255)
 profile1.frequency = 125
 # profile1.dpi_shift = 8200
 # profile1.set_button("G9", 0, 0, 0x04)
-print(profile1);sys.exit()
+# print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
 profile2.color = (0, 255, 0)
@@ -522,8 +523,16 @@ profile3.gshift_color = (255, 255, 0)
 
 
 h = hid.device()
-h.open(0x046D, 0xC24A)
 
+print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
+try:
+    h.open(0x046D, 0xC24A)  # Logitech G600
+except OSError as e:
+    print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
+    print("Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
+    print("The terminal application must have input monitoring permission in System Preferences > Security & Privacy > Privacy > Input Monitoring")
+    print(e)
+    sys.exit()
 
 print("Manufacturer: %s" % h.get_manufacturer_string())
 print("Product: %s" % h.get_product_string())
@@ -531,19 +540,31 @@ print("Serial No: %s" % h.get_serial_number_string())
 
 
 # send_feature_report
-print(profile1)
-print(profile1.feature_report())
-print("writing profile 1", h.send_feature_report(profile1.feature_report()))
+# print(profile1)
+# print(profile1.feature_report())
+print("writing profile 1")
+rc = h.send_feature_report(profile1.feature_report())
+if rc == -1:
+    print("error writing profile 1. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
+    sys.exit()
+print("Successfully wrote profile 1 (%d) bytes" % rc)
+
 
 # print(profile2)
 # print(profile2.feature_report())
-# print(h.send_feature_report(profile2.feature_report()))
+print("writing profile 2")
+rc = h.send_feature_report(profile2.feature_report())
+if rc == -1:
+    print("error writing profile 2. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
+    sys.exit()
+print("Successfully wrote profile 1 (%d) bytes" % rc)
 
-# print(profile3)
-# print(profile3.feature_report())
-# print(h.send_feature_report(profile3.feature_report()))
-
-print("done")
+print("writing profile 3")
+rc = h.send_feature_report(profile3.feature_report())
+if rc == -1:
+    print("error writing profile 3. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
+    sys.exit()
+print("Successfully wrote profile 3 (%d) bytes" % rc)
 
 
 # https://trezor.github.io/cython-hidapi/api.html#hid.device.send_feature_report
