@@ -17,6 +17,7 @@ class LogitechG600Profile:
     RIGHT_SHIFT: int = 0x20
     RIGHT_ALT: int = 0x40
     RIGHT_META: int = 0x80
+    HYPER = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_META
 
     NAME_TO_CODE_MODIFIER_KEY = {
         "BUTTON_1": (0x01, 0x00, 0x00),
@@ -340,8 +341,6 @@ class LogitechG600Profile:
                 raise ValueError("Invalid value %s in color %s" % (c, color))
         self.led_red, self.led_green, self.led_blue = color
 
-
-
     def __repr__(self):
         return "LogitechG600Profile(%d)" % self.profile_number
 
@@ -498,11 +497,11 @@ profile1.gshift_color = (0, 255, 255)
 profile1.frequency = 125
 # profile1.dpi_shift = 8200
 # profile1.set_button("G9", 0, 0, 0x04)
-# print(profile1);sys.exit()
+print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
-profile2.color = (0, 255,0)
-profile2.gshift_color(255, 0, 255)
+profile2.color = (0, 255, 0)
+profile2.gshift_color = (255, 0, 255)
 # profile2.led_red = 0
 # profile2.led_green = 255
 # profile2.led_blue = 0
@@ -510,7 +509,7 @@ profile2.gshift_color(255, 0, 255)
 
 profile3 = LogitechG600Profile(2)
 profile3.color = (0, 0, 255)
-profile3.gshift_color(255, 255, 0)
+profile3.gshift_color = (255, 255, 0)
 # print(profile3);sys.exit()
 # profile3.led_red = 0
 # profile3.led_green = 0
