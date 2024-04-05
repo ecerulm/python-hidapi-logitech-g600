@@ -530,10 +530,10 @@ profile1.set_gshift_button("g17", 0, LogitechG600Profile.MEH, 0x26) # meh + 9
 profile1.set_gshift_button("g18", 0, LogitechG600Profile.MEH, 0x27) # meh + 0
 profile1.set_gshift_button("g19", 0, LogitechG600Profile.MEH, 0x2d) # meh + -
 profile1.set_gshift_button("g20", 0, LogitechG600Profile.MEH, 0x2e) # meh + =
+print(profile1)
+print(profile1.feature_report())
+# sys.exit()
 
-# profile1.dpi_shift = 8200
-# profile1.set_button("G9", 0, 0, 0x04)
-# print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
 profile2.color = (0, 255, 0)
@@ -566,6 +566,7 @@ if rc == -1:
     print("error writing profile 1. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
     sys.exit()
 print("Successfully wrote profile 1 (%d) bytes" % rc)
+time.sleep(5) # wait for the profile to be written before send another write request
 
 
 print("writing profile 2")
@@ -574,6 +575,7 @@ if rc == -1:
     print("error writing profile 2. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
     sys.exit()
 print("Successfully wrote profile 2 (%d) bytes" % rc)
+time.sleep(5) # wait for the profile to be written before send another write request
 
 print("writing profile 3")
 rc = h.send_feature_report(profile3.feature_report())
@@ -581,6 +583,7 @@ if rc == -1:
     print("error writing profile 3. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
     sys.exit()
 print("Successfully wrote profile 3 (%d) bytes" % rc)
+time.sleep(5) # wait for the profile to be written before send another write request
 
 
 print("Set profile 1 as active profile")
