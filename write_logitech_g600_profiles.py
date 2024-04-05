@@ -2,9 +2,6 @@ import hid
 import sys
 
 
-
-
-
 class LogitechG600Profile:
     LED_EFFECT_SOLID: int = (
         0x00  # https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L51-L53
@@ -21,7 +18,6 @@ class LogitechG600Profile:
     RIGHT_ALT: int = 0x40
     RIGHT_META: int = 0x80
 
-
     NAME_TO_CODE_MODIFIER_KEY = {
         "BUTTON_1": (0x01, 0x00, 0x00),
         "BUTTON_2": (0x02, 0x00, 0x00),
@@ -34,7 +30,11 @@ class LogitechG600Profile:
         "PROFILE_CYCLE_UP": (0x14, 0x00, 0x00),
         "RESOLUTION_ALTERNATE": (0x15, 0x00, 0x00),
         "SECOND_MODE": (0x17, 0x00, 0x00),
-        "KEY_1": (0x00, 0x00, 0x1E), # From HID Usage Table for USB / https://usb.org/document-library/hid-usage-tables-15
+        "KEY_1": (
+            0x00,
+            0x00,
+            0x1E,
+        ),  # From HID Usage Table for USB / https://usb.org/document-library/hid-usage-tables-15
         "KEY_2": (0x00, 0x00, 0x1F),
         "KEY_3": (0x00, 0x00, 0x20),
         "KEY_4": (0x00, 0x00, 0x21),
@@ -88,9 +88,12 @@ class LogitechG600Profile:
     def __init__(self, profile_number: int):
         self.profile_number = profile_number
         self.report_id = 0xF3 + (profile_number)
+        if self.report_id not in [0xF3, 0xF4, 0xF5]:
+            raise ValueError("Invalid profile number")
         self.led_red = 0
         self.led_green = 0
         self.led_blue = 0
+        self._gshift_color = (0, 0, 0)
         self.led_effect = LogitechG600Profile.LED_EFFECT_SOLID
         self.led_duration = 0
         self._frequency = 125
@@ -103,41 +106,51 @@ class LogitechG600Profile:
             self._buttons.append((0, 0, 0x1E))
 
         # default mappings from https://www.logitech.com/assets/44964/3/g600-mmo-gaming-mouse-quickstart-guide.pdf
-        self._buttons[self.BUTTON_ORDER["LEFT_CLICK"]] = self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_1"]
-        self._buttons[self.BUTTON_ORDER["RIGHT_CLICK"]] = self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"]
+        self._buttons[self.BUTTON_ORDER["LEFT_CLICK"]] = self.NAME_TO_CODE_MODIFIER_KEY[
+            "BUTTON_1"
+        ]
+        self._buttons[self.BUTTON_ORDER["RIGHT_CLICK"]] = (
+            self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"]
+        )
 
+        self.set_button(
+            "G1", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_1"])
+        )  # button1 - left click
+        self.set_button(
+            "G2", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"])
+        )  # button2 - right click
 
-        self.set_button("G1", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_1"])) # button1 - left click
-        self.set_button("G2", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"])) # button2 - right click
+        self.set_button(
+            "G3", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_3"])
+        )  # button3 - wheel click
+        self.set_button(
+            "G4", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_4"])
+        )  # button4 - wheel left
+        self.set_button(
+            "G5", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_5"])
+        )  # button5 - wheel right
 
-        self.set_button("G3", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_3"])) # button3 - wheel click
-        self.set_button("G4", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_4"])) # button4 - wheel left
-        self.set_button("G5", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_5"])) # button5 - wheel right
-
-        self.set_button("G6", *(self.NAME_TO_CODE_MODIFIER_KEY["SECOND_MODE"])) # SECOND_MODE / G-Shift / 0x17
-
-
+        self.set_button(
+            "G6", *(self.NAME_TO_CODE_MODIFIER_KEY["SECOND_MODE"])
+        )  # SECOND_MODE / G-Shift / 0x17
 
         # self._buttons[self.BUTTON_ORDER["G7"]] = (0, self.LEFT_SHIFT, 0x05)
-        self.set_button("G7", 0, self.LEFT_SHIFT, 0x05) # shift - B
-        self.set_button("G8", *self.NAME_TO_CODE_MODIFIER_KEY["PROFILE_CYCLE_UP"]) # profile cycle up - 0x14
+        self.set_button("G7", 0, self.LEFT_SHIFT, 0x05)  # shift - B
+        self.set_button(
+            "G8", *self.NAME_TO_CODE_MODIFIER_KEY["PROFILE_CYCLE_UP"]
+        )  # profile cycle up - 0x14
 
-
-        for i in range(9,19):
-            self.set_button("G%d"%i, 0, 0, 0x1E+i-9)
+        for i in range(9, 19):
+            self.set_button("G%d" % i, 0, 0, 0x1E + i - 9)
 
         self.set_button("g19", *self.NAME_TO_CODE_MODIFIER_KEY["KEY_MINUS"])
         self.set_button("g20", *self.NAME_TO_CODE_MODIFIER_KEY["KEY_EQUAL"])
 
-
         self._gshift_buttons = self._buttons.copy()
-        for i in range(9,21):
+        for i in range(9, 21):
             # Copy the G9 to G20 buttons to the G-Shift buttons adding LEFT_CTRL modifier
-            code, _, key = self.get_button("G%d"%i)
-            self.set_gshift_button("G%d"%i, code, self.LEFT_CTRL, key)
-
-        if self.report_id not in [0xF3, 0xF4, 0xF5]:
-            raise ValueError("Invalid profile number")
+            code, _, key = self.get_button("G%d" % i)
+            self.set_gshift_button("G%d" % i, code, self.LEFT_CTRL, key)
 
     def get_led_effect_string(self):
         if self.led_effect == LogitechG600Profile.LED_EFFECT_BREATHE:
@@ -169,7 +182,8 @@ class LogitechG600Profile:
         for button in self._buttons:
             to_return.extend(button)
 
-        to_return.extend([self.led_red, self.led_green, self.led_blue])
+        # to_return.extend([self.led_red, self.led_green, self.led_blue])
+        to_return.extend(self.gshift_color)
 
         for button in self._gshift_buttons:
             to_return.extend(button)
@@ -274,7 +288,6 @@ class LogitechG600Profile:
             raise ValueError("Invalid left click value %s" % value)
         self._left_click = LogitechG600Profile.NAME_TO_CODE_MODIFIER_KEY[value]
 
-
     def get_button(self, button_name: str) -> tuple:
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
@@ -292,13 +305,40 @@ class LogitechG600Profile:
         if index is None:
             raise ValueError("Invalid button name %s" % button_name)
         return self._gshift_buttons[index]
-    def set_gshift_button(self, button_name: str, code: int, modifier: int, key: int) -> None:
+
+    def set_gshift_button(
+        self, button_name: str, code: int, modifier: int, key: int
+    ) -> None:
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
             raise ValueError("Invalid button name %s" % button_name)
         self._gshift_buttons[index] = (code, modifier, key)
 
+    @property
+    def gshift_color(self) -> tuple:
+        return self._gshift_color
 
+    @gshift_color.setter
+    def gshift_color(self, color: tuple) -> None:
+        if len(color) != 3:
+            raise ValueError("Invalid color %s" % color)
+        for c in color:
+            if c not in range(256):
+                raise ValueError("Invalid value %s in color %s" % (c, color))
+        self._gshift_color = color
+
+    @property
+    def color(self) -> tuple:
+        return (self.led_red, self.led_green, self.led_blue)
+
+    @color.setter
+    def color(self, color: tuple) -> None:
+        if len(color) != 3:
+            raise ValueError("Invalid color %s" % color)
+        for c in color:
+            if c not in range(256):
+                raise ValueError("Invalid value %s in color %s" % (c, color))
+        self.led_red, self.led_green, self.led_blue = color
 
 
 
@@ -316,76 +356,165 @@ class LogitechG600Profile:
         to_return.append(
             "Frequency %s Hz (0x%02X)" % (self.frequency, self.frequency_to_byte())
         )
-        to_return.append("DPI Shift %4d dpi (0x%02X)" % (self.dpi_shift, self._dpi_shift))
-        to_return.append("DPI Default %4ddpi (0x%02X)" % (self.dpi_default, self._dpi_default))
+        to_return.append(
+            "DPI Shift %4d dpi (0x%02X)" % (self.dpi_shift, self._dpi_shift)
+        )
+        to_return.append(
+            "DPI Default %4ddpi (0x%02X)" % (self.dpi_default, self._dpi_default)
+        )
         to_return.append("DPI1 %4ddpi (0x%02X)" % (self.dpi1, self._dpis[0]))
         to_return.append("DPI2 %4ddpi (0x%02X)" % (self.dpi2, self._dpis[1]))
         to_return.append("DPI3 %4ddpi (0x%02X)" % (self.dpi3, self._dpis[2]))
         to_return.append("DPI4 %4ddpi (0x%02X)" % (self.dpi4, self._dpis[3]))
-        to_return.append("Left Click    G1 0x%02X 0x%02X 0x%02X" % self.get_button("LEFT_CLICK"))
-        to_return.append("Right Click   G2 0x%02X 0x%02X 0x%02X" % self.get_button("RIGHT_CLICK"))
-        to_return.append("              G3 0x%02X 0x%02X 0x%02X" % self.get_button("g3"))
-        to_return.append("              G4 0x%02X 0x%02X 0x%02X" % self.get_button("g4"))
-        to_return.append("              G5 0x%02X 0x%02X 0x%02X" % self.get_button("g5"))
-        to_return.append("              G6 0x%02X 0x%02X 0x%02X" % self.get_button("g6"))
-        to_return.append("              G7 0x%02X 0x%02X 0x%02X" % self.get_button("g7"))
-        to_return.append("              G8 0x%02X 0x%02X 0x%02X" % self.get_button("g8"))
-        to_return.append("              G9 0x%02X 0x%02X 0x%02X" % self.get_button("g9"))
-        to_return.append("             G10 0x%02X 0x%02X 0x%02X" % self.get_button("g10"))
-        to_return.append("             G11 0x%02X 0x%02X 0x%02X" % self.get_button("g11"))
-        to_return.append("             G12 0x%02X 0x%02X 0x%02X" % self.get_button("g12"))
-        to_return.append("             G13 0x%02X 0x%02X 0x%02X" % self.get_button("g13"))
-        to_return.append("             G14 0x%02X 0x%02X 0x%02X" % self.get_button("g14"))
-        to_return.append("             G15 0x%02X 0x%02X 0x%02X" % self.get_button("g15"))
-        to_return.append("             G16 0x%02X 0x%02X 0x%02X" % self.get_button("g16"))
-        to_return.append("             G17 0x%02X 0x%02X 0x%02X" % self.get_button("g17"))
-        to_return.append("             G18 0x%02X 0x%02X 0x%02X" % self.get_button("g18"))
-        to_return.append("             G19 0x%02X 0x%02X 0x%02X" % self.get_button("g19"))
-        to_return.append("             G20 0x%02X 0x%02X 0x%02X" % self.get_button("g20"))
-        to_return.append("G-Shift")
-        to_return.append("Left Click    G1 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("LEFT_CLICK"))
-        to_return.append("Right Click   G2 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("RIGHT_CLICK"))
-        to_return.append("              G3 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g3"))
-        to_return.append("              G4 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g4"))
-        to_return.append("              G5 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g5"))
-        to_return.append("              G6 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g6"))
-        to_return.append("              G7 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g7"))
-        to_return.append("              G8 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g8"))
-        to_return.append("              G9 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g9"))
-        to_return.append("             G10 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g10"))
-        to_return.append("             G11 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g11"))
-        to_return.append("             G12 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g12"))
-        to_return.append("             G13 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g13"))
-        to_return.append("             G14 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g14"))
-        to_return.append("             G15 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g15"))
-        to_return.append("             G16 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g16"))
-        to_return.append("             G17 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g17"))
-        to_return.append("             G18 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g18"))
-        to_return.append("             G19 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g19"))
-        to_return.append("             G20 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g20"))
+        to_return.append(
+            "Left Click    G1 0x%02X 0x%02X 0x%02X" % self.get_button("LEFT_CLICK")
+        )
+        to_return.append(
+            "Right Click   G2 0x%02X 0x%02X 0x%02X" % self.get_button("RIGHT_CLICK")
+        )
+        to_return.append(
+            "              G3 0x%02X 0x%02X 0x%02X" % self.get_button("g3")
+        )
+        to_return.append(
+            "              G4 0x%02X 0x%02X 0x%02X" % self.get_button("g4")
+        )
+        to_return.append(
+            "              G5 0x%02X 0x%02X 0x%02X" % self.get_button("g5")
+        )
+        to_return.append(
+            "              G6 0x%02X 0x%02X 0x%02X" % self.get_button("g6")
+        )
+        to_return.append(
+            "              G7 0x%02X 0x%02X 0x%02X" % self.get_button("g7")
+        )
+        to_return.append(
+            "              G8 0x%02X 0x%02X 0x%02X" % self.get_button("g8")
+        )
+        to_return.append(
+            "              G9 0x%02X 0x%02X 0x%02X" % self.get_button("g9")
+        )
+        to_return.append(
+            "             G10 0x%02X 0x%02X 0x%02X" % self.get_button("g10")
+        )
+        to_return.append(
+            "             G11 0x%02X 0x%02X 0x%02X" % self.get_button("g11")
+        )
+        to_return.append(
+            "             G12 0x%02X 0x%02X 0x%02X" % self.get_button("g12")
+        )
+        to_return.append(
+            "             G13 0x%02X 0x%02X 0x%02X" % self.get_button("g13")
+        )
+        to_return.append(
+            "             G14 0x%02X 0x%02X 0x%02X" % self.get_button("g14")
+        )
+        to_return.append(
+            "             G15 0x%02X 0x%02X 0x%02X" % self.get_button("g15")
+        )
+        to_return.append(
+            "             G16 0x%02X 0x%02X 0x%02X" % self.get_button("g16")
+        )
+        to_return.append(
+            "             G17 0x%02X 0x%02X 0x%02X" % self.get_button("g17")
+        )
+        to_return.append(
+            "             G18 0x%02X 0x%02X 0x%02X" % self.get_button("g18")
+        )
+        to_return.append(
+            "             G19 0x%02X 0x%02X 0x%02X" % self.get_button("g19")
+        )
+        to_return.append(
+            "             G20 0x%02X 0x%02X 0x%02X" % self.get_button("g20")
+        )
+        to_return.append("G-Shift color %s" % (self.gshift_color,))
+        to_return.append(
+            "Left Click    G1 0x%02X 0x%02X 0x%02X"
+            % self.get_gshift_button("LEFT_CLICK")
+        )
+        to_return.append(
+            "Right Click   G2 0x%02X 0x%02X 0x%02X"
+            % self.get_gshift_button("RIGHT_CLICK")
+        )
+        to_return.append(
+            "              G3 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g3")
+        )
+        to_return.append(
+            "              G4 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g4")
+        )
+        to_return.append(
+            "              G5 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g5")
+        )
+        to_return.append(
+            "              G6 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g6")
+        )
+        to_return.append(
+            "              G7 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g7")
+        )
+        to_return.append(
+            "              G8 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g8")
+        )
+        to_return.append(
+            "              G9 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g9")
+        )
+        to_return.append(
+            "             G10 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g10")
+        )
+        to_return.append(
+            "             G11 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g11")
+        )
+        to_return.append(
+            "             G12 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g12")
+        )
+        to_return.append(
+            "             G13 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g13")
+        )
+        to_return.append(
+            "             G14 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g14")
+        )
+        to_return.append(
+            "             G15 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g15")
+        )
+        to_return.append(
+            "             G16 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g16")
+        )
+        to_return.append(
+            "             G17 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g17")
+        )
+        to_return.append(
+            "             G18 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g18")
+        )
+        to_return.append(
+            "             G19 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g19")
+        )
+        to_return.append(
+            "             G20 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g20")
+        )
         return "\n".join(to_return)
 
 
 profile1 = LogitechG600Profile(0)
-profile1.led_red = 255
-profile1.led_green = 0
-profile1.led_blue = 0
-# profile1.led_effect = LogitechG600Profile.LED_EFFECT_BREATHE
-profile1.led_duration = 4
-profile1.frequency = 250
+profile1.color = (255, 0, 0)
+profile1.gshift_color = (0, 255, 255)
+profile1.frequency = 125
 # profile1.dpi_shift = 8200
 # profile1.set_button("G9", 0, 0, 0x04)
+# print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
-profile2.led_red = 0
-profile2.led_green = 255
-profile2.led_blue = 0
+profile2.color = (0, 255,0)
+profile2.gshift_color(255, 0, 255)
+# profile2.led_red = 0
+# profile2.led_green = 255
+# profile2.led_blue = 0
+# print(profile2);sys.exit()
 
 profile3 = LogitechG600Profile(2)
-profile3.led_red = 0
-profile3.led_green = 0
-profile3.led_blue = 255
-
+profile3.color = (0, 0, 255)
+profile3.gshift_color(255, 255, 0)
+# print(profile3);sys.exit()
+# profile3.led_red = 0
+# profile3.led_green = 0
+# profile3.led_blue = 255
 
 
 # print(len(profile1.feature_report()))
@@ -402,10 +531,10 @@ print("Product: %s" % h.get_product_string())
 print("Serial No: %s" % h.get_serial_number_string())
 
 
-# send_feature_report 
+# send_feature_report
 print(profile1)
 print(profile1.feature_report())
-# print(h.send_feature_report(profile1.feature_report()))
+print("writing profile 1", h.send_feature_report(profile1.feature_report()))
 
 # print(profile2)
 # print(profile2.feature_report())
