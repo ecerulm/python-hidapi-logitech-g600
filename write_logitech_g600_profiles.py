@@ -496,36 +496,19 @@ profile1 = LogitechG600Profile(0)
 profile1.color = (255, 0, 0)
 profile1.gshift_color = (0, 255, 255)
 profile1.frequency = 125
-# profile1.dpi_shift = 8200
-# profile1.set_button("G9", 0, 0, 0x04)
-# print(profile1);sys.exit()
 
 profile2 = LogitechG600Profile(1)
 profile2.color = (0, 255, 0)
 profile2.gshift_color = (255, 0, 255)
-# profile2.led_red = 0
-# profile2.led_green = 255
-# profile2.led_blue = 0
-# print(profile2);sys.exit()
 
 profile3 = LogitechG600Profile(2)
 profile3.color = (0, 0, 255)
 profile3.gshift_color = (255, 255, 0)
-# print(profile3);sys.exit()
-# profile3.led_red = 0
-# profile3.led_green = 0
-# profile3.led_blue = 255
 
-
-# print(len(profile1.feature_report()))
-
-# sys.exit(0)
-
-
-h = hid.device()
 
 print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
 try:
+    h = hid.device()
     h.open(0x046D, 0xC24A)  # Logitech G600
 except OSError as e:
     print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
@@ -539,9 +522,6 @@ print("Product: %s" % h.get_product_string())
 print("Serial No: %s" % h.get_serial_number_string())
 
 
-# send_feature_report
-# print(profile1)
-# print(profile1.feature_report())
 print("writing profile 1")
 rc = h.send_feature_report(profile1.feature_report())
 if rc == -1:
@@ -550,8 +530,6 @@ if rc == -1:
 print("Successfully wrote profile 1 (%d) bytes" % rc)
 
 
-# print(profile2)
-# print(profile2.feature_report())
 print("writing profile 2")
 rc = h.send_feature_report(profile2.feature_report())
 if rc == -1:
@@ -565,6 +543,13 @@ if rc == -1:
     print("error writing profile 3. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
     sys.exit()
 print("Successfully wrote profile 3 (%d) bytes" % rc)
+
+
+print("Set profile 1 as active profile")
+h.send_feature_report([0xF0, 0x80, 0x00, 0x00])
+# - [0xF0, 0x80, 0x00, 0x00] for profile 0
+# - [0xF0, 0x90, 0x00, 0x00] for profile 1
+# - [0xF0, 0xa0, 0x00, 0x00] for profile 2
 
 
 # https://trezor.github.io/cython-hidapi/api.html#hid.device.send_feature_report
