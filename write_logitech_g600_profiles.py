@@ -137,7 +137,7 @@ class LogitechG600Profile:
         self.led_duration = 0
         self._frequency = 125
         self._dpi_shift = 0x04
-        self._dpi_default = 2
+        self._dpi_default = 2 # 1200 dpi
         self._dpis = [3200 // 50, 2000 // 50, 1200 // 50, 400 // 50]
         self._buttons = []
 
@@ -145,13 +145,6 @@ class LogitechG600Profile:
             self._buttons.append((0, 0, 0x1E))
 
         # default mappings from https://www.logitech.com/assets/44964/3/g600-mmo-gaming-mouse-quickstart-guide.pdf
-        self._buttons[self.BUTTON_ORDER["LEFT_CLICK"]] = self.NAME_TO_CODE_MODIFIER_KEY[
-            "BUTTON_1"
-        ]
-        self._buttons[self.BUTTON_ORDER["RIGHT_CLICK"]] = (
-            self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"]
-        )
-
         self.set_button("G1", "BUTTON_1")  # button1 - left click
         self.set_button("G2", "BUTTON_2")  # button2 - right click
 
@@ -393,7 +386,6 @@ class LogitechG600Profile:
             sys.exit()
 
     def write_to_device(self):
-        print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
         h = self._open_device()
 
         print("writing profile", self.profile_number)
@@ -602,7 +594,6 @@ profile0.set_gshift_button("g19", value="MEH+MINUS")  # meh + -
 profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
 print(profile0)
 print(profile0.feature_report())
-# sys.exit()
 
 
 profile1 = LogitechG600Profile(1)
