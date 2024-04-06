@@ -43,23 +43,52 @@ class LogitechG600Profile:
             0x00,
             0x1E,
         ),  # From HID Usage Table for USB / https://usb.org/document-library/hid-usage-tables-15
+        "HYPER+1": (0x00, HYPER, 0x1E),
+        "MEH+1": (0x00, MEH, 0x1E),
         "KEY_2": (0x00, 0x00, 0x1F),
+        "HYPER+2": (0x00, HYPER, 0x1F),
+        "MEH+2": (0x00, MEH, 0x1F),
         "KEY_3": (0x00, 0x00, 0x20),
+        "HYPER+3": (0x00, HYPER, 0x20),
+        "MEH+3": (0x00, MEH, 0x20),
         "KEY_4": (0x00, 0x00, 0x21),
+        "HYPER+4": (0x00, HYPER, 0x21),
+        "MEH+4": (0x00, MEH, 0x21),
         "KEY_5": (0x00, 0x00, 0x22),
+        "HYPER+5": (0x00, HYPER, 0x22),
+        "MEH+5": (0x00, MEH, 0x22),
         "KEY_6": (0x00, 0x00, 0x23),
+        "HYPER+6": (0x00, HYPER, 0x23),
+        "MEH+6": (0x00, MEH, 0x23),
         "KEY_7": (0x00, 0x00, 0x24),
+        "HYPER+7": (0x00, HYPER, 0x24),
+        "MEH+7": (0x00, MEH, 0x24),
         "KEY_8": (0x00, 0x00, 0x25),
+        "HYPER+8": (0x00, HYPER, 0x25),
+        "MEH+8": (0x00, MEH, 0x25),
         "KEY_9": (0x00, 0x00, 0x26),
+        "HYPER+9": (0x00, HYPER, 0x26),
+        "MEH+9": (0x00, MEH, 0x26),
         "KEY_0": (0x00, 0x00, 0x27),
+        "HYPER+0": (0x00, HYPER, 0x27),
+        "MEH+0": (0x00, MEH, 0x27),
         "KEY_MINUS": (0x00, 0x00, 0x2D),
+        "HYPER+MINUS": (0x00, HYPER, 0x2D),
+        "MEH+MINUS": (0x00, MEH, 0x2D),
         "KEY_EQUAL": (0x00, 0x00, 0x2E),
+        "HYPER+EQUAL": (0x00, HYPER, 0x2E),
+        "MEH+EQUAL": (0x00, MEH, 0x2E),
         "KEY_MUTE": (0x00, 0x00, 0x7F),
         "KEY_VOLUME_UP": (0x00, 0x00, 0x80),
         "KEY_VOLUME_DOWN": (0x00, 0x00, 0x81),
         # There is no Media Play/Pause key in the HID Usage Table for USB  / Keyboard/Keypad Page (0x07)
         "KEY_A": (0x00, 0x00, 0x04),
         "KEY_B": (0x00, 0x00, 0x05),
+        "SHIFT+B": (0x00, LEFT_SHIFT, 0x05),
+        "CMD+B": (0x00, LEFT_CMD, 0x05),
+        "KEY_V": (0x00, 0x00, 0x19),
+        "CMD+V": (0x00, LEFT_CMD, 0x19),
+        "CMD+SHIFT+V": (0x00, LEFT_CMD | LEFT_SHIFT, 0x19),
     }
     BUTTON_ORDER = {
         "G1": 0,
@@ -123,44 +152,30 @@ class LogitechG600Profile:
             self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"]
         )
 
-        self.set_button(
-            "G1", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_1"])
-        )  # button1 - left click
-        self.set_button(
-            "G2", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_2"])
-        )  # button2 - right click
+        self.set_button("G1", "BUTTON_1")  # button1 - left click
+        self.set_button("G2", "BUTTON_2")  # button2 - right click
 
-        self.set_button(
-            "G3", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_3"])
-        )  # button3 - wheel click
-        self.set_button(
-            "G4", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_4"])
-        )  # button4 - wheel left
-        self.set_button(
-            "G5", *(self.NAME_TO_CODE_MODIFIER_KEY["BUTTON_5"])
-        )  # button5 - wheel right
+        self.set_button("G3", "BUTTON_3")  # button3 - wheel click
+        self.set_button("G4", "BUTTON_4")  # button4 - wheel left
+        self.set_button("G5", "BUTTON_5")  # button5 - wheel right
 
-        self.set_button(
-            "G6", *(self.NAME_TO_CODE_MODIFIER_KEY["SECOND_MODE"])
-        )  # SECOND_MODE / G-Shift / 0x17
+        self.set_button("G6", "SECOND_MODE")  # SECOND_MODE / G-Shift / 0x17
 
         # self._buttons[self.BUTTON_ORDER["G7"]] = (0, self.LEFT_SHIFT, 0x05)
-        self.set_button("G7", 0, self.LEFT_SHIFT, 0x05)  # shift - B
-        self.set_button(
-            "G8", *self.NAME_TO_CODE_MODIFIER_KEY["PROFILE_CYCLE_UP"]
-        )  # profile cycle up - 0x14
+        self.set_button("G7", value=(0, self.LEFT_SHIFT, 0x05))  # shift - B
+        self.set_button("G8", "PROFILE_CYCLE_UP")  # profile cycle up - 0x14
 
         for i in range(9, 19):
-            self.set_button("G%d" % i, 0, 0, 0x1E + i - 9)
+            self.set_button("G%d" % i, value=(0, 0, 0x1E + i - 9))
 
-        self.set_button("g19", *self.NAME_TO_CODE_MODIFIER_KEY["KEY_MINUS"])
-        self.set_button("g20", *self.NAME_TO_CODE_MODIFIER_KEY["KEY_EQUAL"])
+        self.set_button("g19", "KEY_MINUS")
+        self.set_button("g20", "KEY_EQUAL")
 
         self._gshift_buttons = self._buttons.copy()
         for i in range(9, 21):
             # Copy the G9 to G20 buttons to the G-Shift buttons adding LEFT_CTRL modifier
             code, _, key = self.get_button("G%d" % i)
-            self.set_gshift_button("G%d" % i, code, self.LEFT_CTRL, key)
+            self.set_gshift_button("G%d" % i, value=(code, self.LEFT_CTRL, key))
 
     def get_led_effect_string(self):
         if self.led_effect == LogitechG600Profile.LED_EFFECT_BREATHE:
@@ -304,7 +319,10 @@ class LogitechG600Profile:
             raise ValueError("Invalid button name %s" % button_name)
         return self._buttons[index]
 
-    def set_button(self, button_name: str, code: int, modifier: int, key: int) -> None:
+    def set_button(self, button_name: str, value: tuple[int, int, int] | str) -> None:
+        if isinstance(value, str):
+            value = self.NAME_TO_CODE_MODIFIER_KEY[value]
+        code, modifier, key = value
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
             raise ValueError("Invalid button name %s" % button_name)
@@ -317,8 +335,11 @@ class LogitechG600Profile:
         return self._gshift_buttons[index]
 
     def set_gshift_button(
-        self, button_name: str, code: int, modifier: int, key: int
+        self, button_name: str, value: tuple[int, int, int] | str
     ) -> None:
+        if isinstance(value, str):
+            value = self.NAME_TO_CODE_MODIFIER_KEY[value]
+        code, modifier, key = value
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
             raise ValueError("Invalid button name %s" % button_name)
@@ -551,39 +572,34 @@ profile0.color = (255, 0, 0)
 profile0.gshift_color = (0, 255, 255)
 profile0.frequency = 125
 
-profile0.set_button("g4", 0, 0, 0x81)  # keyboard volume down
-profile0.set_button("g5", 0, 0, 0x80)  # keyboard volume up
-
-profile0.set_button(
-    "g9", 0, LogitechG600Profile.HYPER, 0x1E
-)  # hyper + 1 / Keyboard Maestro trigger screencapture -ic
-profile0.set_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x06)  # Cmd + v (copy)
-profile0.set_button(
-    "g11", 0, LogitechG600Profile.RIGHT_CMD | LogitechG600Profile.RIGHT_SHIFT, 0x19
-)  # Cmd + shift + v (Paste without formating)
-profile0.set_button("g12", 0, LogitechG600Profile.HYPER, 0x21)  # hyper + 4
-profile0.set_button("g13", 0, LogitechG600Profile.HYPER, 0x22)  # hyper + 5
-profile0.set_button("g14", 0, LogitechG600Profile.HYPER, 0x23)  # hyper + 6
-profile0.set_button("g15", 0, LogitechG600Profile.HYPER, 0x24)  # hyper + 7
-profile0.set_button("g16", 0, LogitechG600Profile.HYPER, 0x25)  # hyper + 8
-profile0.set_button("g17", 0, LogitechG600Profile.HYPER, 0x26)  # hyper + 9
-profile0.set_button("g18", 0, LogitechG600Profile.HYPER, 0x27)  # hyper + 0
-profile0.set_button("g19", 0, LogitechG600Profile.HYPER, 0x2D)  # hyper + -
-profile0.set_button("g20", 0, LogitechG600Profile.HYPER, 0x2E)  # hyper + =
-profile0.set_gshift_button("g9", 0, LogitechG600Profile.MEH, 0x1E)  # meh + 1
-profile0.set_gshift_button(
-    "g10", 0, LogitechG600Profile.RIGHT_CMD, 0x05
-)  # Cmd + b (bold)
-profile0.set_gshift_button("g11", 0, LogitechG600Profile.MEH, 0x20)  # meh + 3
-profile0.set_gshift_button("g12", 0, LogitechG600Profile.MEH, 0x21)  # meh + 4
-profile0.set_gshift_button("g13", 0, LogitechG600Profile.MEH, 0x22)  # meh + 5
-profile0.set_gshift_button("g14", 0, LogitechG600Profile.MEH, 0x23)  # meh + 6
-profile0.set_gshift_button("g15", 0, LogitechG600Profile.MEH, 0x24)  # meh + 7
-profile0.set_gshift_button("g16", 0, LogitechG600Profile.MEH, 0x25)  # meh + 8
-profile0.set_gshift_button("g17", 0, LogitechG600Profile.MEH, 0x26)  # meh + 9
-profile0.set_gshift_button("g18", 0, LogitechG600Profile.MEH, 0x27)  # meh + 0
-profile0.set_gshift_button("g19", 0, LogitechG600Profile.MEH, 0x2D)  # meh + -
-profile0.set_gshift_button("g20", 0, LogitechG600Profile.MEH, 0x2E)  # meh + =
+profile0.set_button("g4", value=(0, 0, 0x81))  # keyboard volume down
+profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
+profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
+profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
+profile0.set_button("g9", value="HYPER+1")  # hyper + 1 / KM screencapture -ic
+profile0.set_button("g10", value="CMD+V")  # Cmd + v (copy)
+profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
+profile0.set_button("g12", value="HYPER+4")  # hyper + 4
+profile0.set_button("g13", value="HYPER+5")  # hyper + 5
+profile0.set_button("g14", value="HYPER+6")  # hyper + 6
+profile0.set_button("g15", value="HYPER+7")  # hyper + 7
+profile0.set_button("g16", value="HYPER+8")  # hyper + 8
+profile0.set_button("g17", value="HYPER+9")  # hyper + 9
+profile0.set_button("g18", value="HYPER+0")  # hyper + 0
+profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
+profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
+profile0.set_gshift_button("g9", value="MEH+1")  # meh + 1
+profile0.set_gshift_button("g10", value="CMD+B")  # Cmd + b (bold)
+profile0.set_gshift_button("g11", value="MEH+3")  # meh + 3
+profile0.set_gshift_button("g12", value="MEH+4")  # meh + 4
+profile0.set_gshift_button("g13", value="MEH+5")  # meh + 5
+profile0.set_gshift_button("g14", value="MEH+6")  # meh + 6
+profile0.set_gshift_button("g15", value="MEH+7")  # meh + 7
+profile0.set_gshift_button("g16", value="MEH+8")  # meh + 8
+profile0.set_gshift_button("g17", value="MEH+9")  # meh + 9
+profile0.set_gshift_button("g18", value="MEH+0")  # meh + 0
+profile0.set_gshift_button("g19", value="MEH+MINUS")  # meh + -
+profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
 print(profile0)
 print(profile0.feature_report())
 # sys.exit()
