@@ -58,6 +58,8 @@ class LogitechG600Profile:
         "KEY_VOLUME_UP": (0x00, 0x00, 0x80),
         "KEY_VOLUME_DOWN": (0x00, 0x00, 0x81),
         # There is no Media Play/Pause key in the HID Usage Table for USB  / Keyboard/Keypad Page (0x07)
+        "KEY_A": (0x00, 0x00, 0x04),
+        "KEY_B": (0x00, 0x00, 0x05),
     }
     BUTTON_ORDER = {
         "G1": 0,
