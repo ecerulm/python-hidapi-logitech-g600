@@ -86,6 +86,9 @@ class LogitechG600Profile:
         "KEY_B": (0x00, 0x00, 0x05),
         "SHIFT+B": (0x00, LEFT_SHIFT, 0x05),
         "CMD+B": (0x00, LEFT_CMD, 0x05),
+        "KEY_C": (0x00, 0x00, 0x06),
+        "SHIFT+C": (0x00, LEFT_SHIFT, 0x06),
+        "CMD+C": (0x00, LEFT_CMD, 0x06),
         "KEY_V": (0x00, 0x00, 0x19),
         "CMD+V": (0x00, LEFT_CMD, 0x19),
         "CMD+SHIFT+V": (0x00, LEFT_CMD | LEFT_SHIFT, 0x19),
@@ -569,7 +572,7 @@ profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
 profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
 profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
 profile0.set_button("g9", value="HYPER+1")  # hyper + 1 / KM screencapture -ic
-profile0.set_button("g10", value="CMD+V")  # Cmd + v (copy)
+profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
 profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
 profile0.set_button("g12", value="HYPER+4")  # hyper + 4
 profile0.set_button("g13", value="HYPER+5")  # hyper + 5
