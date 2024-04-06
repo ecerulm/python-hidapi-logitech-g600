@@ -348,6 +348,52 @@ class LogitechG600Profile:
                 raise ValueError("Invalid value %s in color %s" % (c, color))
         self.led_red, self.led_green, self.led_blue = color
 
+    def _open_device(self) -> hid.device:
+        print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
+        try:
+            h = hid.device()
+            h.open(0x046D, 0xC24A)  # Logitech:0x046d G600:0xC24A
+            print("Manufacturer: %s" % h.get_manufacturer_string())
+            print("Product: %s" % h.get_product_string())
+            print("Serial No: %s" % h.get_serial_number_string())
+            time.sleep(
+                2
+            )  # wait until device is ready, other profile writes may be in progress/pending
+            return h
+        except OSError as e:
+            print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
+            print("Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
+            print(
+                "The terminal application must have input monitoring permission in System Preferences > Security & Privacy > Privacy > Input Monitoring"
+            )
+            print(e)
+            sys.exit()
+
+    def write_to_device(self):
+        print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
+        h = self._open_device()
+
+        print("writing profile", self.profile_number)
+        rc = h.send_feature_report(self.feature_report())
+        if rc == -1:
+            print(
+                "error writing profile %d. Close Logitech GHUB, Karabiner, Hammerspoon, etc."
+                % self.profile_number
+            )
+            sys.exit()
+        print("Successfully wrote profile %d (%d bytes)" % (self.profile_number, rc))
+        h.close()
+
+    def set_as_active_profile(self):
+        print("Set profile %d as active profile" % self.profile_number)
+        h = self._open_device()
+        h.send_feature_report([0xF0, 0x80 | (self.profile_number << 4), 0x00, 0x00])
+        # 0xF0: the report id to set the active profile
+        # - [0xF0, 0x80, 0x00, 0x00] for profile 1 (0x80 | (index << 4)) index: 0
+        # - [0xF0, 0x90, 0x00, 0x00] for profile 2 (0x80 | (index << 4)) index: 1
+        # - [0xF0, 0xa0, 0x00, 0x00] for profile 3 (0x80 | (index << 4)) index: 2
+        h.close()
+
     def __repr__(self):
         return "LogitechG600Profile(%d)" % self.profile_number
 
@@ -498,99 +544,64 @@ class LogitechG600Profile:
         return "\n".join(to_return)
 
 
-profile1 = LogitechG600Profile(0)
-profile1.color = (255, 0, 0)
-profile1.gshift_color = (0, 255, 255)
-profile1.frequency = 125
+profile0 = LogitechG600Profile(0)
+profile0.color = (255, 0, 0)
+profile0.gshift_color = (0, 255, 255)
+profile0.frequency = 125
 
-profile1.set_button("g4", 0, 0, 0x81)  # keyboard volume down
-profile1.set_button("g5", 0, 0, 0x80)  # keyboard volume up
+profile0.set_button("g4", 0, 0, 0x81)  # keyboard volume down
+profile0.set_button("g5", 0, 0, 0x80)  # keyboard volume up
 
-profile1.set_button("g9", 0, LogitechG600Profile.HYPER, 0x1e) # hyper + 1 / Keyboard Maestro trigger screencapture -ic
-profile1.set_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x06) # Cmd + v (copy)
-profile1.set_button("g11", 0, LogitechG600Profile.RIGHT_CMD|LogitechG600Profile.RIGHT_SHIFT, 0x19) # Cmd + shift + v (Paste without formating)
-profile1.set_button("g12", 0, LogitechG600Profile.HYPER, 0x21) # hyper + 4
-profile1.set_button("g13", 0, LogitechG600Profile.HYPER, 0x22) # hyper + 5
-profile1.set_button("g14", 0, LogitechG600Profile.HYPER, 0x23) # hyper + 6
-profile1.set_button("g15", 0, LogitechG600Profile.HYPER, 0x24) # hyper + 7
-profile1.set_button("g16", 0, LogitechG600Profile.HYPER, 0x25) # hyper + 8
-profile1.set_button("g17", 0, LogitechG600Profile.HYPER, 0x26) # hyper + 9
-profile1.set_button("g18", 0, LogitechG600Profile.HYPER, 0x27) # hyper + 0
-profile1.set_button("g19", 0, LogitechG600Profile.HYPER, 0x2d) # hyper + -
-profile1.set_button("g20", 0, LogitechG600Profile.HYPER, 0x2e) # hyper + =
-profile1.set_gshift_button("g9", 0, LogitechG600Profile.MEH, 0x1e) # meh + 1
-profile1.set_gshift_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x05) # Cmd + b (bold)
-profile1.set_gshift_button("g11", 0, LogitechG600Profile.MEH, 0x20) # meh + 3
-profile1.set_gshift_button("g12", 0, LogitechG600Profile.MEH, 0x21) # meh + 4
-profile1.set_gshift_button("g13", 0, LogitechG600Profile.MEH, 0x22) # meh + 5
-profile1.set_gshift_button("g14", 0, LogitechG600Profile.MEH, 0x23) # meh + 6
-profile1.set_gshift_button("g15", 0, LogitechG600Profile.MEH, 0x24) # meh + 7
-profile1.set_gshift_button("g16", 0, LogitechG600Profile.MEH, 0x25) # meh + 8
-profile1.set_gshift_button("g17", 0, LogitechG600Profile.MEH, 0x26) # meh + 9
-profile1.set_gshift_button("g18", 0, LogitechG600Profile.MEH, 0x27) # meh + 0
-profile1.set_gshift_button("g19", 0, LogitechG600Profile.MEH, 0x2d) # meh + -
-profile1.set_gshift_button("g20", 0, LogitechG600Profile.MEH, 0x2e) # meh + =
-print(profile1)
-print(profile1.feature_report())
+profile0.set_button(
+    "g9", 0, LogitechG600Profile.HYPER, 0x1E
+)  # hyper + 1 / Keyboard Maestro trigger screencapture -ic
+profile0.set_button("g10", 0, LogitechG600Profile.RIGHT_CMD, 0x06)  # Cmd + v (copy)
+profile0.set_button(
+    "g11", 0, LogitechG600Profile.RIGHT_CMD | LogitechG600Profile.RIGHT_SHIFT, 0x19
+)  # Cmd + shift + v (Paste without formating)
+profile0.set_button("g12", 0, LogitechG600Profile.HYPER, 0x21)  # hyper + 4
+profile0.set_button("g13", 0, LogitechG600Profile.HYPER, 0x22)  # hyper + 5
+profile0.set_button("g14", 0, LogitechG600Profile.HYPER, 0x23)  # hyper + 6
+profile0.set_button("g15", 0, LogitechG600Profile.HYPER, 0x24)  # hyper + 7
+profile0.set_button("g16", 0, LogitechG600Profile.HYPER, 0x25)  # hyper + 8
+profile0.set_button("g17", 0, LogitechG600Profile.HYPER, 0x26)  # hyper + 9
+profile0.set_button("g18", 0, LogitechG600Profile.HYPER, 0x27)  # hyper + 0
+profile0.set_button("g19", 0, LogitechG600Profile.HYPER, 0x2D)  # hyper + -
+profile0.set_button("g20", 0, LogitechG600Profile.HYPER, 0x2E)  # hyper + =
+profile0.set_gshift_button("g9", 0, LogitechG600Profile.MEH, 0x1E)  # meh + 1
+profile0.set_gshift_button(
+    "g10", 0, LogitechG600Profile.RIGHT_CMD, 0x05
+)  # Cmd + b (bold)
+profile0.set_gshift_button("g11", 0, LogitechG600Profile.MEH, 0x20)  # meh + 3
+profile0.set_gshift_button("g12", 0, LogitechG600Profile.MEH, 0x21)  # meh + 4
+profile0.set_gshift_button("g13", 0, LogitechG600Profile.MEH, 0x22)  # meh + 5
+profile0.set_gshift_button("g14", 0, LogitechG600Profile.MEH, 0x23)  # meh + 6
+profile0.set_gshift_button("g15", 0, LogitechG600Profile.MEH, 0x24)  # meh + 7
+profile0.set_gshift_button("g16", 0, LogitechG600Profile.MEH, 0x25)  # meh + 8
+profile0.set_gshift_button("g17", 0, LogitechG600Profile.MEH, 0x26)  # meh + 9
+profile0.set_gshift_button("g18", 0, LogitechG600Profile.MEH, 0x27)  # meh + 0
+profile0.set_gshift_button("g19", 0, LogitechG600Profile.MEH, 0x2D)  # meh + -
+profile0.set_gshift_button("g20", 0, LogitechG600Profile.MEH, 0x2E)  # meh + =
+print(profile0)
+print(profile0.feature_report())
 # sys.exit()
 
 
-profile2 = LogitechG600Profile(1)
-profile2.color = (0, 255, 0)
-profile2.gshift_color = (255, 1, 255)
+profile1 = LogitechG600Profile(1)
+profile1.color = (0, 255, 0)
+profile1.gshift_color = (255, 1, 255)
 
-profile3 = LogitechG600Profile(2)
-profile3.color = (0, 0, 255)
-profile3.gshift_color = (255, 255, 0)
-
-
-print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
-try:
-    h = hid.device()
-    h.open(0x046D, 0xC24A)  # Logitech G600
-except OSError as e:
-    print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
-    print("Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
-    print("The terminal application must have input monitoring permission in System Preferences > Security & Privacy > Privacy > Input Monitoring")
-    print(e)
-    sys.exit()
-
-print("Manufacturer: %s" % h.get_manufacturer_string())
-print("Product: %s" % h.get_product_string())
-print("Serial No: %s" % h.get_serial_number_string())
+profile2 = LogitechG600Profile(2)
+profile2.color = (0, 0, 255)
+profile2.gshift_color = (255, 255, 0)
 
 
-print("writing profile 1")
-rc = h.send_feature_report(profile1.feature_report())
-if rc == -1:
-    print("error writing profile 1. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
-    sys.exit()
-print("Successfully wrote profile 1 (%d) bytes" % rc)
-time.sleep(5) # wait for the profile to be written before send another write request
+profile0.write_to_device()
+profile0.set_as_active_profile()
+profile1.write_to_device()
+# profile1.set_as_active_profile()
+profile2.write_to_device()
+# profile2.set_as_active_profile()
 
 
-print("writing profile 2")
-rc = h.send_feature_report(profile2.feature_report())
-if rc == -1:
-    print("error writing profile 2. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
-    sys.exit()
-print("Successfully wrote profile 2 (%d) bytes" % rc)
-time.sleep(5) # wait for the profile to be written before send another write request
-
-print("writing profile 3")
-rc = h.send_feature_report(profile3.feature_report())
-if rc == -1:
-    print("error writing profile 3. Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
-    sys.exit()
-print("Successfully wrote profile 3 (%d) bytes" % rc)
-time.sleep(5) # wait for the profile to be written before send another write request
-
-
-print("Set profile 1 as active profile")
-h.send_feature_report([0xF0, 0x80, 0x00, 0x00])
-# - [0xF0, 0x80, 0x00, 0x00] for profile 0
-# - [0xF0, 0x90, 0x00, 0x00] for profile 1
-# - [0xF0, 0xa0, 0x00, 0x00] for profile 2
-
-
-# https://trezor.github.io/cython-hidapi/api.html#hid.device.send_feature_report
+# https://trezor.github.io/cython-hidapi/api.html#hid.device.SEND_FEATURE_REPORT
