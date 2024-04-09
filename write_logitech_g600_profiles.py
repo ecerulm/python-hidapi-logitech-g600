@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import hid
 import sys
 import time
+
+import hid
 
 
 class LogitechG600Profile:
@@ -141,7 +142,7 @@ class LogitechG600Profile:
         self.led_duration = 0
         self._frequency = 125
         self._dpi_shift = 0x04
-        self._dpi_default = 2 # 1200 dpi
+        self._dpi_default = 2  # 1200 dpi
         self._dpis = [3200 // 50, 2000 // 50, 1200 // 50, 400 // 50]
         self._buttons = []
 
