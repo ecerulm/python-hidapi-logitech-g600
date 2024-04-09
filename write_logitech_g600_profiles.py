@@ -587,7 +587,7 @@ profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
 profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
 profile0.set_gshift_button("g9", value="MEH+1")  # meh + 1
 profile0.set_gshift_button("g10", value="CMD+B")  # Cmd + b (bold)
-profile0.set_gshift_button("g11", value="MEH+3")  # meh + 3
+profile0.set_gshift_button("g11", value="CMD+V")  # Cmd + V (paste)
 profile0.set_gshift_button("g12", value="MEH+4")  # meh + 4
 profile0.set_gshift_button("g13", value="MEH+5")  # meh + 5
 profile0.set_gshift_button("g14", value="MEH+6")  # meh + 6
