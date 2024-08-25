@@ -12,11 +12,21 @@ class LogitechG600Profile:
     LED_EFFECT_BREATHE: int = 0x01
     LED_EFFECT_LED_CYCLE: int = 0x02
 
-    LEFT_CTRL: int = 0x01
+    # Modifiers. From HID 1.5 / Chapter 10. Keyboard/keypad page 0x07  
+    # E0 Keyboard LeftControl
+    # E1 Keyboard LeftShift
+    # E2 Keyboard LeftAlt
+    # E3 Keyboard Left GUI 
+    # E4 Keyboard RightControl
+    # E5 Keyboard LeftShift
+    # E6 Keyboard LeftAlt
+    # E7 Keyboard Left GUI 
+        
+    LEFT_CTRL: int = 0x01 # This values are not from HID 1.5, it's a G600 thing
     LEFT_SHIFT: int = 0x02
     LEFT_ALT: int = 0x04
-    LEFT_META: int = 0x08
-    LEFT_GUI: int = 0x08
+    LEFT_META: int = 0x08 # 
+    LEFT_GUI: int = 0x08 # LEFT_META, LEFT_GUI and LEFT_CMD are the same key
     LEFT_CMD: int = 0x08
     RIGHT_CTRL: int = 0x10
     RIGHT_SHIFT: int = 0x20
@@ -45,8 +55,9 @@ class LogitechG600Profile:
             0x00,
             0x1E,
         ),  # From HID Usage Table for USB / https://usb.org/document-library/hid-usage-tables-15
-        "HYPER+1": (0x00, HYPER, 0x1E),
-        "MEH+1": (0x00, MEH, 0x1E),
+
+        "HYPER+1": (0x00, HYPER, 0x1E), # From HID usage table for USB, Chapter 10 Keyboard/Keypad page 0x07
+        "MEH+1": (0x00, MEH, 0x1E), # From HID 1.5 / Chapter 10 Keyboard/Keypat page 0x07 / Keyboard 1 and !
         "KEY_2": (0x00, 0x00, 0x1F),
         "HYPER+2": (0x00, HYPER, 0x1F),
         "MEH+2": (0x00, MEH, 0x1F),
@@ -71,9 +82,9 @@ class LogitechG600Profile:
         "KEY_9": (0x00, 0x00, 0x26),
         "HYPER+9": (0x00, HYPER, 0x26),
         "MEH+9": (0x00, MEH, 0x26),
-        "KEY_0": (0x00, 0x00, 0x27),
+        "KEY_0": (0x00, 0x00, 0x27), # From HID 1.5 / Chapter 10 Keyboard/Keypad page 0x07 / Keyboard 0 and )
         "HYPER+0": (0x00, HYPER, 0x27),
-        "MEH+0": (0x00, MEH, 0x27),
+        "MEH+0": (0x00, MEH, 0x27), # 0x27
         "KEY_MINUS": (0x00, 0x00, 0x2D),
         "HYPER+MINUS": (0x00, HYPER, 0x2D),
         "MEH+MINUS": (0x00, MEH, 0x2D),
@@ -387,6 +398,9 @@ class LogitechG600Profile:
             print(
                 "The terminal application must have input monitoring permission in System Preferences > Security & Privacy > Privacy > Input Monitoring"
             )
+            print(
+                "The terminal application must have input monitoring permission in System Settings > Privacy & Security > Input Monitoring"
+            )
             print(e)
             sys.exit()
 
@@ -397,7 +411,7 @@ class LogitechG600Profile:
         rc = h.send_feature_report(self.feature_report())
         if rc == -1:
             print(
-                "error writing profile %d. Close Logitech GHUB, Karabiner, Hammerspoon, etc."
+                "error writing profile %d.\nClose Logitech GHUB, Karabiner, Hammerspoon, etc.\n run this as sudo root"
                 % self.profile_number
             )
             sys.exit()
@@ -564,10 +578,18 @@ class LogitechG600Profile:
         return "\n".join(to_return)
 
 
+
+print('MEH', f'{LogitechG600Profile.MEH:02x}')
+print('HYPER', f'{LogitechG600Profile.HYPER:02x}')
 profile0 = LogitechG600Profile(0)
 profile0.color = (255, 0, 0)
 profile0.gshift_color = (0, 255, 255)
 profile0.frequency = 125
+
+# HYPER =  Control + Shift + Alt + Command (all)
+# HYPER = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_GUI
+# MEH = Control + Shift + Alt  (No Command)
+# MEH = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT
 
 profile0.set_button("g4", value=(0, 0, 0x81))  # keyboard volume down
 profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
@@ -600,6 +622,8 @@ profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
 print(profile0)
 print(profile0.feature_report())
 
+
+# sys.exit()
 
 profile1 = LogitechG600Profile(1)
 profile1.color = (0, 255, 0)
