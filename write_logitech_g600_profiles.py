@@ -105,6 +105,8 @@ class LogitechG600Profile:
         "KEY_V": (0x00, 0x00, 0x19),
         "CMD+V": (0x00, LEFT_CMD, 0x19),
         "CMD+SHIFT+V": (0x00, LEFT_CMD | LEFT_SHIFT, 0x19),
+        "CTRL+RIGHT": (0x00, LEFT_CTRL, 0x4F), # in HID UsageTable for USB / 4f -> Keyboard RightArrow 
+        "CTRL+LEFT": (0x00, LEFT_CTRL, 0x50), # in HID UsageTable for USB / 50 -> Keyboard LeftArrow 
     }
     BUTTON_ORDER = {
         "G1": 0,
@@ -602,8 +604,10 @@ profile0.set_button("g12", value="HYPER+4")  # hyper + 4
 profile0.set_button("g13", value="HYPER+5")  # hyper + 5
 profile0.set_button("g14", value="HYPER+6")  # hyper + 6
 profile0.set_button("g15", value="HYPER+7")  # hyper + 7
-profile0.set_button("g16", value="HYPER+8")  # hyper + 8
-profile0.set_button("g17", value="HYPER+9")  # hyper + 9
+# profile0.set_button("g16", value="HYPER+8")  # hyper + 8, Keyboard Maestro is mapped to 
+# profile0.set_button("g17", value="HYPER+9")  # hyper + 9
+profile0.set_button("g16", value="CTRL+LEFT")  #  Mission control > Previous desktop space
+profile0.set_button("g17", value="CTRL+RIGHT")  # Missing control > Next desktop space
 profile0.set_button("g18", value="HYPER+0")  # hyper + 0
 profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
 profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
