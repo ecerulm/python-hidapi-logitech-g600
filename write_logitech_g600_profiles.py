@@ -95,6 +95,7 @@ class LogitechG600Profile:
         "KEY_VOLUME_UP": (0x00, 0x00, 0x80),
         "KEY_VOLUME_DOWN": (0x00, 0x00, 0x81),
         # There is no Media Play/Pause key in the HID Usage Table for USB  / Keyboard/Keypad Page (0x07)
+        # The Play/Pause (0xCD) and Play/Skip (0xCE) are part of Consumer Page 0x0C
         "KEY_A": (0x00, 0x00, 0x04),
         "KEY_B": (0x00, 0x00, 0x05),
         "SHIFT+B": (0x00, LEFT_SHIFT, 0x05),
@@ -158,7 +159,20 @@ class LogitechG600Profile:
         self._dpi_shift = 0x04
         self._dpi_default = 2  # 1200 dpi
         self._dpis = [3200 // 50, 2000 // 50, 1200 // 50, 400 // 50]
-        self._buttons = []
+        self._buttons = [] # tuples (code, modifier, value) 
+        # code can be 
+        # 0x00 regular keyboard key from HID Usage Table 0x07 Keyboard usage
+        # 0x01 button 1
+        # 0x02 button 2
+        # 0x03 button 3
+        # 0x04 button 4
+        # 0x05 button 5
+        # 0x11 DPI resolution up 
+        # 0x12 DPI resolution down
+        # 0x13 resolution cycle
+        # 0x14 profile cycle
+        # 0x15 resolution alternate
+        # 0x17 second mode
 
         for i in range(20):
             self._buttons.append((0, 0, 0x1E))
@@ -212,16 +226,19 @@ class LogitechG600Profile:
         to_return.append(self._dpi_shift)
         to_return.append(self._dpi_default)
         to_return.extend(self._dpis)
-        to_return.extend([0 for _ in range(6)])
+        to_return.extend([0 for _ in range(6)])  # Fill with 6 zeroes 
         to_return.append(2)
-        to_return.extend([0 for _ in range(6)])
+        to_return.extend([0 for _ in range(6)])  # Fill with 6 zeroes
 
+
+        # Section with all the regular buttons (no G-shift)
         for button in self._buttons:
             to_return.extend(button)
 
         # to_return.extend([self.led_red, self.led_green, self.led_blue])
         to_return.extend(self.gshift_color)
 
+        # Section with the G-shift buttons
         for button in self._gshift_buttons:
             to_return.extend(button)
         if len(to_return) != 154:
@@ -332,6 +349,8 @@ class LogitechG600Profile:
         return self._buttons[index]
 
     def set_button(self, button_name: str, value: tuple[int, int, int] | str) -> None:
+        # (code, modifier, key)
+        # code
         if isinstance(value, str):
             value = self.NAME_TO_CODE_MODIFIER_KEY[value]
         code, modifier, key = value
@@ -605,7 +624,8 @@ profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
 profile0.set_button("g12", value="HYPER+4")  # hyper + 4
 profile0.set_button("g13", value="HYPER+5")  # hyper + 5
 profile0.set_button("g14", value="HYPER+6")  # hyper + 6
-profile0.set_button("g15", value="HYPER+7")  # hyper + 7
+# profile0.set_button("g15", value="HYPER+7")  # hyper + 7
+profile0.set_button("g15", value="HYPER+7")  # Play/Pause from HID Usage Tables
 # profile0.set_button("g16", value="HYPER+8")  # hyper + 8, Keyboard Maestro is mapped to 
 # profile0.set_button("g17", value="HYPER+9")  # hyper + 9
 profile0.set_button("g16", value="CTRL+LEFT")  #  Mission control > Previous desktop space

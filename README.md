@@ -144,6 +144,30 @@ the key mappings are (code, modifier, key):
 * code `0x17` means G-Shift button, second_mode
 
 
+# Media Keys 
+
+
+Play/Pause and Play/Skip are NOT defined in HID Usage Table "Keyboard Usage (0x07)" 
+like regular keys. 
+
+They are defined in "Consumer Usage (0x0C)
+
+* Play/Pause 0xCD
+* Play/Skip 0xCE
+
+
+It's not clear how to map that to the button definition in the USB feature report
+
+```
+(code, modifier, value)
+```
+
+`code=0x00` it's used for regular keys but I can't find what code I need to use 
+for media keys
+
+One solution it's not to use those media keys at all, and use other software
+like Keyboard Maestro. You can map HYPER+7 to G15 and let Keyboard Maestro to 
+map HYPER+7 to Play/Pause, etc.
 
 
 # How to run
@@ -192,6 +216,7 @@ sudo python write_logitech_g600_profiles.py
 # References
 
 * [libratbag profile report](https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L61-L77)
+* [libratbag button values](https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L105-L118)
 * [libratbag write profile](https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L477-L590)
 * [libratbag set active profile](https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L247)
 
