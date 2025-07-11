@@ -148,19 +148,23 @@ the key mappings are (code, modifier, key):
 
 # How to run
 
+
+
 You need to give your terminal application the "Input Monitoring" permission via
 System Preferences -> Security & Privacy -> Privacy -> Input Monitoring
+
+Usually you will get the prompt `xxxx would like to receive keystroke from any application.
+Gran access to this application in Privacy & Security settings, located in System Settings`
 
 You also need to run as root (sudo)
 
 ```
-brew install hidapi
-pyenv virtualenv 3.12 g600
-source $(pyenv prefix g600)/bin/activate
-pip install -U pip
-pip install hidapi
-sudo python write_logitech_g600_profiles.py
+brew install uv
+uv sync
+sudo uv run write_logitech_g600_profiles.py
 ```
+
+
 
 You need to run as sudo, you can't send HID feature reports without root access in macOS at least.
 
@@ -174,6 +178,16 @@ Close all software that maybe using USB devices directly like
 You may need to run the script multiple times (5-10 time) to get the mouse to accept the new profile.
 I don't know why but sometimes it takes a few tries. and sometimes it works on the first try.
 
+## Old way
+
+```
+brew install hidapi
+pyenv virtualenv 3.12 g600
+source $(pyenv prefix g600)/bin/activate
+pip install -U pip
+pip install hidapi
+sudo python write_logitech_g600_profiles.py
+```
 
 # References
 

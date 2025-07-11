@@ -107,6 +107,7 @@ class LogitechG600Profile:
         "CMD+SHIFT+V": (0x00, LEFT_CMD | LEFT_SHIFT, 0x19),
         "CTRL+RIGHT": (0x00, LEFT_CTRL, 0x4F), # in HID UsageTable for USB / 4f -> Keyboard RightArrow 
         "CTRL+LEFT": (0x00, LEFT_CTRL, 0x50), # in HID UsageTable for USB / 50 -> Keyboard LeftArrow 
+        "CTRL+CMD+SHIFT+4": (0x00, LEFT_CTRL|LEFT_CMD|LEFT_SHIFT, 0x21), # in HIG UsageTable for USB / 0x21 -> "4"
     }
     BUTTON_ORDER = {
         "G1": 0,
@@ -425,9 +426,9 @@ class LogitechG600Profile:
         h = self._open_device()
         h.send_feature_report([0xF0, 0x80 | (self.profile_number << 4), 0x00, 0x00])
         # 0xF0: the report id to set the active profile
-        # - [0xF0, 0x80, 0x00, 0x00] for profile 1 (0x80 | (index << 4)) index: 0
-        # - [0xF0, 0x90, 0x00, 0x00] for profile 2 (0x80 | (index << 4)) index: 1
-        # - [0xF0, 0xa0, 0x00, 0x00] for profile 3 (0x80 | (index << 4)) index: 2
+        # - [0xF0, 0x80, 0x00, 0x00] for profile 1 (0x80 | (index << 4)) index: 0, 0x80 = b10000000
+        # - [0xF0, 0x90, 0x00, 0x00] for profile 2 (0x80 | (index << 4)) index: 1, 0x90 = b10010000 
+        # - [0xF0, 0xa0, 0x00, 0x00] for profile 3 (0x80 | (index << 4)) index: 2, 0xa0 = b10100000
         h.close()
 
     def __repr__(self):
@@ -597,7 +598,8 @@ profile0.set_button("g4", value=(0, 0, 0x81))  # keyboard volume down
 profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
 profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
 profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
-profile0.set_button("g9", value="HYPER+1")  # hyper + 1 / KM screencapture -ic
+# profile0.set_button("g9", value="HYPER+1")  # hyper + 1 / KM screencapture -ic
+profile0.set_button("g9", value="CTRL+CMD+SHIFT+4") # macOS screenshot default keyboard shortcut for Copy picture of selected area to the clipboard
 profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
 profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
 profile0.set_button("g12", value="HYPER+4")  # hyper + 4
@@ -623,11 +625,8 @@ profile0.set_gshift_button("g17", value="MEH+9")  # meh + 9
 profile0.set_gshift_button("g18", value="MEH+0")  # meh + 0
 profile0.set_gshift_button("g19", value="MEH+MINUS")  # meh + -
 profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
-print(profile0)
-print(profile0.feature_report())
-
-
-# sys.exit()
+# print(profile0)
+# print(profile0.feature_report())
 
 profile1 = LogitechG600Profile(1)
 profile1.color = (0, 255, 0)
@@ -637,13 +636,23 @@ profile2 = LogitechG600Profile(2)
 profile2.color = (0, 0, 255)
 profile2.gshift_color = (255, 255, 0)
 
+# sys.exit()
 
-profile0.write_to_device()
-profile0.set_as_active_profile()
-profile1.write_to_device()
-# profile1.set_as_active_profile()
-profile2.write_to_device()
-# profile2.set_as_active_profile()
+while True:
+    profile_number = input("Which profile to write: ")
+    profile_number = int(profile_number)
+    if profile_number == 0:
+        profile = profile0
+    elif profile_number == 1:
+        profile = profile1
+    elif profile_number == 2:
+        profile = profile2
+    profile.write_to_device()
+    profile.set_as_active_profile()
+    print("Wrote profile", profile_number)
+    print("Color (R,G,B): ", profile.color)
+
+
 
 
 # https://trezor.github.io/cython-hidapi/api.html#hid.device.SEND_FEATURE_REPORT

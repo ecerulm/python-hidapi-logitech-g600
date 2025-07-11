@@ -1,0 +1,9 @@
+[project]
+name = "python-hidapi-logitech-g600"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "hidapi==0.14.0.post2",
+]
