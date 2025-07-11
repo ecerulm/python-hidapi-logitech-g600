@@ -109,6 +109,7 @@ class LogitechG600Profile:
         "CTRL+RIGHT": (0x00, LEFT_CTRL, 0x4F), # in HID UsageTable for USB / 4f -> Keyboard RightArrow 
         "CTRL+LEFT": (0x00, LEFT_CTRL, 0x50), # in HID UsageTable for USB / 50 -> Keyboard LeftArrow 
         "CTRL+CMD+SHIFT+4": (0x00, LEFT_CTRL|LEFT_CMD|LEFT_SHIFT, 0x21), # in HIG UsageTable for USB / 0x21 -> "4"
+        "CMD+`": (0x00, LEFT_CMD, 0x35 ), # in HID Usage Table for USB / 35 -> Keyboard Grave Accent and Tilde
     }
     BUTTON_ORDER = {
         "G1": 0,
@@ -621,7 +622,8 @@ profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
 profile0.set_button("g9", value="CTRL+CMD+SHIFT+4") # macOS screenshot default keyboard shortcut for Copy picture of selected area to the clipboard
 profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
 profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
-profile0.set_button("g12", value="HYPER+4")  # hyper + 4
+# profile0.set_button("g12", value="HYPER+4")  # hyper + 4
+profile0.set_button("g12", value="CMD+`")  # Cmd-` cycle through windows of same app
 profile0.set_button("g13", value="HYPER+5")  # hyper + 5
 profile0.set_button("g14", value="HYPER+6")  # hyper + 6
 # profile0.set_button("g15", value="HYPER+7")  # hyper + 7
