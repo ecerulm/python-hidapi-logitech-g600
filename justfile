@@ -27,3 +27,8 @@ check: format-check lint
 # Pass extra flags through, e.g. `just run --profiles 0 --reuse_connection true`
 run *ARGS:
     sudo uv run {{script}} {{ARGS}}
+
+# temp diagnostic
+diag:
+    uv run python -c "import sys; print('exe', sys.executable)"
+    uv run python -c "import hid; print('hid', hid.__file__)"
