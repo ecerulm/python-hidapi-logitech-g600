@@ -264,7 +264,7 @@ class LogitechG600Profile:
         return self._frequency
 
     @frequency.setter
-    def frequency(self, f: int) -> int:
+    def frequency(self, f: int) -> None:
         if f not in [125, 250, 500, 1000]:
             raise ValueError("Invalid frequency")
         self._frequency = f
@@ -403,6 +403,10 @@ class LogitechG600Profile:
                 raise ValueError("Invalid value %s in color %s" % (c, color))
         self.led_red, self.led_green, self.led_blue = color
 
+    # Seconds to wait after opening before sending a report: the device may
+    # still be busy applying a previous profile write.
+    _OPEN_SETTLE_SECONDS = 2
+
     def _open_device(self) -> hid.device:
         print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
         try:
@@ -411,45 +415,50 @@ class LogitechG600Profile:
             print("Manufacturer: %s" % h.get_manufacturer_string())
             print("Product: %s" % h.get_product_string())
             print("Serial No: %s" % h.get_serial_number_string())
-            time.sleep(
-                2
-            )  # wait until device is ready, other profile writes may be in progress/pending
+            time.sleep(self._OPEN_SETTLE_SECONDS)
             return h
-        except OSError as e:
+        except OSError:
             print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
             print("Close Logitech GHUB, Karabiner, Hammerspoon, etc.")
             print(
-                "The terminal application must have input monitoring permission in System Preferences > Security & Privacy > Privacy > Input Monitoring"
-            )
-            print(
                 "The terminal application must have input monitoring permission in System Settings > Privacy & Security > Input Monitoring"
             )
-            print(e)
-            sys.exit()
+            raise
 
     def write_to_device(self):
         h = self._open_device()
-
-        print("writing profile", self.profile_number)
-        rc = h.send_feature_report(self.feature_report())
-        if rc == -1:
+        try:
+            print("writing profile", self.profile_number)
+            rc = h.send_feature_report(self.feature_report())
+            if rc == -1:
+                raise OSError(
+                    "error writing profile %d.\n"
+                    "Close Logitech GHUB, Karabiner, Hammerspoon, etc.\n"
+                    "run this as sudo root" % self.profile_number
+                )
             print(
-                "error writing profile %d.\nClose Logitech GHUB, Karabiner, Hammerspoon, etc.\n run this as sudo root"
-                % self.profile_number
+                "Successfully wrote profile %d (%d bytes)" % (self.profile_number, rc)
             )
-            sys.exit()
-        print("Successfully wrote profile %d (%d bytes)" % (self.profile_number, rc))
-        h.close()
+        finally:
+            h.close()
 
     def set_as_active_profile(self):
         print("Set profile %d as active profile" % self.profile_number)
         h = self._open_device()
-        h.send_feature_report([0xF0, 0x80 | (self.profile_number << 4), 0x00, 0x00])
-        # 0xF0: the report id to set the active profile
-        # - [0xF0, 0x80, 0x00, 0x00] for profile 1 (0x80 | (index << 4)) index: 0, 0x80 = b10000000
-        # - [0xF0, 0x90, 0x00, 0x00] for profile 2 (0x80 | (index << 4)) index: 1, 0x90 = b10010000 
-        # - [0xF0, 0xa0, 0x00, 0x00] for profile 3 (0x80 | (index << 4)) index: 2, 0xa0 = b10100000
-        h.close()
+        try:
+            rc = h.send_feature_report(
+                [0xF0, 0x80 | (self.profile_number << 4), 0x00, 0x00]
+            )
+            # 0xF0: the report id to set the active profile
+            # - [0xF0, 0x80, 0x00, 0x00] for profile 1 (0x80 | (index << 4)) index: 0, 0x80 = b10000000
+            # - [0xF0, 0x90, 0x00, 0x00] for profile 2 (0x80 | (index << 4)) index: 1, 0x90 = b10010000
+            # - [0xF0, 0xa0, 0x00, 0x00] for profile 3 (0x80 | (index << 4)) index: 2, 0xa0 = b10100000
+            if rc == -1:
+                raise OSError(
+                    "error setting profile %d as active" % self.profile_number
+                )
+        finally:
+            h.close()
 
     def __repr__(self):
         return "LogitechG600Profile(%d)" % self.profile_number
@@ -475,206 +484,97 @@ class LogitechG600Profile:
         to_return.append("DPI2 %4ddpi (0x%02X)" % (self.dpi2, self._dpis[1]))
         to_return.append("DPI3 %4ddpi (0x%02X)" % (self.dpi3, self._dpis[2]))
         to_return.append("DPI4 %4ddpi (0x%02X)" % (self.dpi4, self._dpis[3]))
-        to_return.append(
-            "Left Click    G1 0x%02X 0x%02X 0x%02X" % self.get_button("LEFT_CLICK")
-        )
-        to_return.append(
-            "Right Click   G2 0x%02X 0x%02X 0x%02X" % self.get_button("RIGHT_CLICK")
-        )
-        to_return.append(
-            "              G3 0x%02X 0x%02X 0x%02X" % self.get_button("g3")
-        )
-        to_return.append(
-            "              G4 0x%02X 0x%02X 0x%02X" % self.get_button("g4")
-        )
-        to_return.append(
-            "              G5 0x%02X 0x%02X 0x%02X" % self.get_button("g5")
-        )
-        to_return.append(
-            "              G6 0x%02X 0x%02X 0x%02X" % self.get_button("g6")
-        )
-        to_return.append(
-            "              G7 0x%02X 0x%02X 0x%02X" % self.get_button("g7")
-        )
-        to_return.append(
-            "              G8 0x%02X 0x%02X 0x%02X" % self.get_button("g8")
-        )
-        to_return.append(
-            "              G9 0x%02X 0x%02X 0x%02X" % self.get_button("g9")
-        )
-        to_return.append(
-            "             G10 0x%02X 0x%02X 0x%02X" % self.get_button("g10")
-        )
-        to_return.append(
-            "             G11 0x%02X 0x%02X 0x%02X" % self.get_button("g11")
-        )
-        to_return.append(
-            "             G12 0x%02X 0x%02X 0x%02X" % self.get_button("g12")
-        )
-        to_return.append(
-            "             G13 0x%02X 0x%02X 0x%02X" % self.get_button("g13")
-        )
-        to_return.append(
-            "             G14 0x%02X 0x%02X 0x%02X" % self.get_button("g14")
-        )
-        to_return.append(
-            "             G15 0x%02X 0x%02X 0x%02X" % self.get_button("g15")
-        )
-        to_return.append(
-            "             G16 0x%02X 0x%02X 0x%02X" % self.get_button("g16")
-        )
-        to_return.append(
-            "             G17 0x%02X 0x%02X 0x%02X" % self.get_button("g17")
-        )
-        to_return.append(
-            "             G18 0x%02X 0x%02X 0x%02X" % self.get_button("g18")
-        )
-        to_return.append(
-            "             G19 0x%02X 0x%02X 0x%02X" % self.get_button("g19")
-        )
-        to_return.append(
-            "             G20 0x%02X 0x%02X 0x%02X" % self.get_button("g20")
-        )
+        labels = {1: "Left Click   ", 2: "Right Click  "}
+        for i in range(1, 21):
+            label = labels.get(i, "             ")
+            to_return.append(
+                "%sG%-2d 0x%02X 0x%02X 0x%02X"
+                % ((label, i) + self.get_button("G%d" % i))
+            )
         to_return.append("G-Shift color %s" % (self.gshift_color,))
-        to_return.append(
-            "Left Click    G1 0x%02X 0x%02X 0x%02X"
-            % self.get_gshift_button("LEFT_CLICK")
-        )
-        to_return.append(
-            "Right Click   G2 0x%02X 0x%02X 0x%02X"
-            % self.get_gshift_button("RIGHT_CLICK")
-        )
-        to_return.append(
-            "              G3 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g3")
-        )
-        to_return.append(
-            "              G4 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g4")
-        )
-        to_return.append(
-            "              G5 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g5")
-        )
-        to_return.append(
-            "              G6 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g6")
-        )
-        to_return.append(
-            "              G7 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g7")
-        )
-        to_return.append(
-            "              G8 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g8")
-        )
-        to_return.append(
-            "              G9 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g9")
-        )
-        to_return.append(
-            "             G10 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g10")
-        )
-        to_return.append(
-            "             G11 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g11")
-        )
-        to_return.append(
-            "             G12 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g12")
-        )
-        to_return.append(
-            "             G13 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g13")
-        )
-        to_return.append(
-            "             G14 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g14")
-        )
-        to_return.append(
-            "             G15 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g15")
-        )
-        to_return.append(
-            "             G16 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g16")
-        )
-        to_return.append(
-            "             G17 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g17")
-        )
-        to_return.append(
-            "             G18 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g18")
-        )
-        to_return.append(
-            "             G19 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g19")
-        )
-        to_return.append(
-            "             G20 0x%02X 0x%02X 0x%02X" % self.get_gshift_button("g20")
-        )
+        for i in range(1, 21):
+            label = labels.get(i, "             ")
+            to_return.append(
+                "%sG%-2d 0x%02X 0x%02X 0x%02X"
+                % ((label, i) + self.get_gshift_button("G%d" % i))
+            )
         return "\n".join(to_return)
 
 
 
-print('MEH', f'{LogitechG600Profile.MEH:02x}')
-print('HYPER', f'{LogitechG600Profile.HYPER:02x}')
-profile0 = LogitechG600Profile(0)
-profile0.color = (255, 0, 0)
-profile0.gshift_color = (0, 255, 255)
-profile0.frequency = 125
+def build_profiles() -> list[LogitechG600Profile]:
+    print('MEH', f'{LogitechG600Profile.MEH:02x}')
+    print('HYPER', f'{LogitechG600Profile.HYPER:02x}')
+    profile0 = LogitechG600Profile(0)
+    profile0.color = (255, 0, 0)
+    profile0.gshift_color = (0, 255, 255)
+    profile0.frequency = 125
 
-# HYPER =  Control + Shift + Alt + Command (all)
-# HYPER = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_GUI
-# MEH = Control + Shift + Alt  (No Command)
-# MEH = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT
+    # HYPER = Control + Shift + Alt + Command (all)  = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT | LEFT_GUI
+    # MEH   = Control + Shift + Alt  (no Command)    = LEFT_CTRL | LEFT_SHIFT | LEFT_ALT
 
-profile0.set_button("g4", value=(0, 0, 0x81))  # keyboard volume down
-profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
-profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
-profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
-# profile0.set_button("g9", value="HYPER+1")  # hyper + 1 / KM screencapture -ic
-profile0.set_button("g9", value="CTRL+CMD+SHIFT+4") # macOS screenshot default keyboard shortcut for Copy picture of selected area to the clipboard
-profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
-profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
-# profile0.set_button("g12", value="HYPER+4")  # hyper + 4
-profile0.set_button("g12", value="CMD+`")  # Cmd-` cycle through windows of same app
-profile0.set_button("g13", value="HYPER+5")  # hyper + 5
-profile0.set_button("g14", value="HYPER+6")  # hyper + 6
-# profile0.set_button("g15", value="HYPER+7")  # hyper + 7
-profile0.set_button("g15", value="HYPER+7")  # Play/Pause from HID Usage Tables
-# profile0.set_button("g16", value="HYPER+8")  # hyper + 8, Keyboard Maestro is mapped to 
-# profile0.set_button("g17", value="HYPER+9")  # hyper + 9
-profile0.set_button("g16", value="CTRL+LEFT")  #  Mission control > Previous desktop space
-profile0.set_button("g17", value="CTRL+RIGHT")  # Missing control > Next desktop space
-profile0.set_button("g18", value="HYPER+0")  # hyper + 0
-profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
-profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
-profile0.set_gshift_button("g9", value="MEH+1")  # meh + 1
-profile0.set_gshift_button("g10", value="CMD+B")  # Cmd + b (bold)
-profile0.set_gshift_button("g11", value="CMD+V")  # Cmd + V (paste)
-profile0.set_gshift_button("g12", value="MEH+4")  # meh + 4
-profile0.set_gshift_button("g13", value="MEH+5")  # meh + 5
-profile0.set_gshift_button("g14", value="MEH+6")  # meh + 6
-profile0.set_gshift_button("g15", value="MEH+7")  # meh + 7
-profile0.set_gshift_button("g16", value="MEH+8")  # meh + 8
-profile0.set_gshift_button("g17", value="MEH+9")  # meh + 9
-profile0.set_gshift_button("g18", value="MEH+0")  # meh + 0
-profile0.set_gshift_button("g19", value="MEH+MINUS")  # meh + -
-profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
-# print(profile0)
-# print(profile0.feature_report())
+    profile0.set_button("g4", value=(0, 0, 0x81))  # keyboard volume down
+    profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
+    profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
+    profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
+    profile0.set_button("g9", value="CTRL+CMD+SHIFT+4")  # macOS screenshot of selected area to clipboard
+    profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
+    profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
+    profile0.set_button("g12", value="HYPER+4")  # hyper + 4
+    profile0.set_button("g13", value="HYPER+5")  # hyper + 5
+    profile0.set_button("g14", value="HYPER+6")  # hyper + 6
+    profile0.set_button("g15", value="HYPER+7")  # hyper + 7
+    profile0.set_button("g16", value="CTRL+LEFT")  # Mission Control > Previous desktop space
+    profile0.set_button("g17", value="CTRL+RIGHT")  # Mission Control > Next desktop space
+    profile0.set_button("g18", value="HYPER+0")  # hyper + 0
+    profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
+    profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
+    profile0.set_gshift_button("g9", value="MEH+1")  # meh + 1
+    profile0.set_gshift_button("g10", value="CMD+B")  # Cmd + b (bold)
+    profile0.set_gshift_button("g11", value="CMD+V")  # Cmd + V (paste)
+    profile0.set_gshift_button("g12", value="MEH+4")  # meh + 4
+    profile0.set_gshift_button("g13", value="MEH+5")  # meh + 5
+    profile0.set_gshift_button("g14", value="MEH+6")  # meh + 6
+    profile0.set_gshift_button("g15", value="MEH+7")  # meh + 7
+    profile0.set_gshift_button("g16", value="MEH+8")  # meh + 8
+    profile0.set_gshift_button("g17", value="MEH+9")  # meh + 9
+    profile0.set_gshift_button("g18", value="MEH+0")  # meh + 0
+    profile0.set_gshift_button("g19", value="MEH+MINUS")  # meh + -
+    profile0.set_gshift_button("g20", value="MEH+EQUAL")  # meh + =
 
-profile1 = LogitechG600Profile(1)
-profile1.color = (0, 255, 0)
-profile1.gshift_color = (255, 1, 255)
+    profile1 = LogitechG600Profile(1)
+    profile1.color = (0, 255, 0)
+    profile1.gshift_color = (255, 1, 255)
 
-profile2 = LogitechG600Profile(2)
-profile2.color = (0, 0, 255)
-profile2.gshift_color = (255, 255, 0)
+    profile2 = LogitechG600Profile(2)
+    profile2.color = (0, 0, 255)
+    profile2.gshift_color = (255, 255, 0)
 
-# sys.exit()
-
-while True:
-    profile_number = input("Which profile to write: ")
-    profile_number = int(profile_number)
-    if profile_number == 0:
-        profile = profile0
-    elif profile_number == 1:
-        profile = profile1
-    elif profile_number == 2:
-        profile = profile2
-    profile.write_to_device()
-    profile.set_as_active_profile()
-    print("Wrote profile", profile_number)
-    print("Color (R,G,B): ", profile.color)
+    return [profile0, profile1, profile2]
 
 
+def main() -> int:
+    profiles = build_profiles()
+    try:
+        for profile in profiles:
+            profile.write_to_device()
+            print("Wrote profile", profile.profile_number)
+            print("Color (R,G,B): ", profile.color)
+    except OSError as e:
+        print(e)
+        return 1
+
+    # Only profile0 is fully configured, so leave it as the active profile.
+    try:
+        profiles[0].set_as_active_profile()
+    except OSError as e:
+        print(e)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 
 
 # https://trezor.github.io/cython-hidapi/api.html#hid.device.SEND_FEATURE_REPORT

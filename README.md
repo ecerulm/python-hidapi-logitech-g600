@@ -199,6 +199,10 @@ Close all software that maybe using USB devices directly like
 * HammerSpoon
 * Keyboard Maestro
 
+The script writes all 3 profiles (profile 0, 1 and 2) in one run and then exits,
+leaving profile 0 (the only fully configured one) as the active profile. On
+failure it prints the error and exits with a non-zero status.
+
 You may need to run the script multiple times (5-10 time) to get the mouse to accept the new profile.
 I don't know why but sometimes it takes a few tries. and sometimes it works on the first try.
 
