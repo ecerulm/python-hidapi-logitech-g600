@@ -188,7 +188,15 @@ uv sync
 sudo uv run write_logitech_g600_profiles.py
 ```
 
+Or via the [`just`](https://github.com/casey/just) task runner:
 
+```
+just run                                  # write all 3 profiles
+just run --profiles 0                      # write only profile 0
+just run --reuse_connection true           # open the device once and reuse the handle
+```
+
+`just format`, `just lint` and `just check` format / lint the code with ruff.
 
 You need to run as sudo, you can't send HID feature reports without root access in macOS at least.
 
@@ -202,6 +210,13 @@ Close all software that maybe using USB devices directly like
 The script writes all 3 profiles (profile 0, 1 and 2) in one run and then exits,
 leaving profile 0 (the only fully configured one) as the active profile. On
 failure it prints the error and exits with a non-zero status.
+
+CLI flags (parsed via pydantic-settings, also settable as `G600_*` env vars):
+
+* `--profiles 0 1 2` &mdash; which profiles to write (default all)
+* `--active_profile {N|null}` &mdash; profile to leave active, or `null` to leave unchanged (default 0)
+* `--reuse_connection {true|false}` &mdash; reuse one device handle for all operations (default false; some setups reject reused handles)
+* `--settle_seconds N` &mdash; wait after opening before sending a report (default 2)
 
 You may need to run the script multiple times (5-10 time) to get the mouse to accept the new profile.
 I don't know why but sometimes it takes a few tries. and sometimes it works on the first try.

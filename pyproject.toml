@@ -1,9 +1,27 @@
 [project]
 name = "python-hidapi-logitech-g600"
 version = "0.1.0"
-description = "Add your description here"
+description = "Write onboard profiles to a Logitech G600 mouse over HID"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "hidapi==0.14.0.post2",
+    "pydantic-settings>=2.0",
 ]
+
+[project.scripts]
+write-logitech-g600-profiles = "write_logitech_g600_profiles:main"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+# Long reference URLs and HID-usage-table comments are kept verbatim.
+ignore = ["E501"]

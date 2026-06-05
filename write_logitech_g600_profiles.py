@@ -3,30 +3,30 @@ import sys
 import time
 
 import hid
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LogitechG600Profile:
-    LED_EFFECT_SOLID: int = (
-        0x00  # https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L51-L53
-    )
+    LED_EFFECT_SOLID: int = 0x00  # https://github.com/libratbag/libratbag/blob/8444ceb638b19c3fbeb073a5cd29f17c6d34dd07/src/driver-logitech-g600.c#L51-L53
     LED_EFFECT_BREATHE: int = 0x01
     LED_EFFECT_LED_CYCLE: int = 0x02
 
-    # Modifiers. From HID 1.5 / Chapter 10. Keyboard/keypad page 0x07  
+    # Modifiers. From HID 1.5 / Chapter 10. Keyboard/keypad page 0x07
     # E0 Keyboard LeftControl
     # E1 Keyboard LeftShift
     # E2 Keyboard LeftAlt
-    # E3 Keyboard Left GUI 
+    # E3 Keyboard Left GUI
     # E4 Keyboard RightControl
     # E5 Keyboard LeftShift
     # E6 Keyboard LeftAlt
-    # E7 Keyboard Left GUI 
-        
-    LEFT_CTRL: int = 0x01 # This values are not from HID 1.5, it's a G600 thing
+    # E7 Keyboard Left GUI
+
+    LEFT_CTRL: int = 0x01  # This values are not from HID 1.5, it's a G600 thing
     LEFT_SHIFT: int = 0x02
     LEFT_ALT: int = 0x04
-    LEFT_META: int = 0x08 # 
-    LEFT_GUI: int = 0x08 # LEFT_META, LEFT_GUI and LEFT_CMD are the same key
+    LEFT_META: int = 0x08  #
+    LEFT_GUI: int = 0x08  # LEFT_META, LEFT_GUI and LEFT_CMD are the same key
     LEFT_CMD: int = 0x08
     RIGHT_CTRL: int = 0x10
     RIGHT_SHIFT: int = 0x20
@@ -55,9 +55,16 @@ class LogitechG600Profile:
             0x00,
             0x1E,
         ),  # From HID Usage Table for USB / https://usb.org/document-library/hid-usage-tables-15
-
-        "HYPER+1": (0x00, HYPER, 0x1E), # From HID usage table for USB, Chapter 10 Keyboard/Keypad page 0x07
-        "MEH+1": (0x00, MEH, 0x1E), # From HID 1.5 / Chapter 10 Keyboard/Keypat page 0x07 / Keyboard 1 and !
+        "HYPER+1": (
+            0x00,
+            HYPER,
+            0x1E,
+        ),  # From HID usage table for USB, Chapter 10 Keyboard/Keypad page 0x07
+        "MEH+1": (
+            0x00,
+            MEH,
+            0x1E,
+        ),  # From HID 1.5 / Chapter 10 Keyboard/Keypat page 0x07 / Keyboard 1 and !
         "KEY_2": (0x00, 0x00, 0x1F),
         "HYPER+2": (0x00, HYPER, 0x1F),
         "MEH+2": (0x00, MEH, 0x1F),
@@ -82,9 +89,13 @@ class LogitechG600Profile:
         "KEY_9": (0x00, 0x00, 0x26),
         "HYPER+9": (0x00, HYPER, 0x26),
         "MEH+9": (0x00, MEH, 0x26),
-        "KEY_0": (0x00, 0x00, 0x27), # From HID 1.5 / Chapter 10 Keyboard/Keypad page 0x07 / Keyboard 0 and )
+        "KEY_0": (
+            0x00,
+            0x00,
+            0x27,
+        ),  # From HID 1.5 / Chapter 10 Keyboard/Keypad page 0x07 / Keyboard 0 and )
         "HYPER+0": (0x00, HYPER, 0x27),
-        "MEH+0": (0x00, MEH, 0x27), # 0x27
+        "MEH+0": (0x00, MEH, 0x27),  # 0x27
         "KEY_MINUS": (0x00, 0x00, 0x2D),
         "HYPER+MINUS": (0x00, HYPER, 0x2D),
         "MEH+MINUS": (0x00, MEH, 0x2D),
@@ -106,10 +117,26 @@ class LogitechG600Profile:
         "KEY_V": (0x00, 0x00, 0x19),
         "CMD+V": (0x00, LEFT_CMD, 0x19),
         "CMD+SHIFT+V": (0x00, LEFT_CMD | LEFT_SHIFT, 0x19),
-        "CTRL+RIGHT": (0x00, LEFT_CTRL, 0x4F), # in HID UsageTable for USB / 4f -> Keyboard RightArrow 
-        "CTRL+LEFT": (0x00, LEFT_CTRL, 0x50), # in HID UsageTable for USB / 50 -> Keyboard LeftArrow 
-        "CTRL+CMD+SHIFT+4": (0x00, LEFT_CTRL|LEFT_CMD|LEFT_SHIFT, 0x21), # in HIG UsageTable for USB / 0x21 -> "4"
-        "CMD+`": (0x00, LEFT_CMD, 0x35 ), # in HID Usage Table for USB / 35 -> Keyboard Grave Accent and Tilde
+        "CTRL+RIGHT": (
+            0x00,
+            LEFT_CTRL,
+            0x4F,
+        ),  # in HID UsageTable for USB / 4f -> Keyboard RightArrow
+        "CTRL+LEFT": (
+            0x00,
+            LEFT_CTRL,
+            0x50,
+        ),  # in HID UsageTable for USB / 50 -> Keyboard LeftArrow
+        "CTRL+CMD+SHIFT+4": (
+            0x00,
+            LEFT_CTRL | LEFT_CMD | LEFT_SHIFT,
+            0x21,
+        ),  # in HIG UsageTable for USB / 0x21 -> "4"
+        "CMD+`": (
+            0x00,
+            LEFT_CMD,
+            0x35,
+        ),  # in HID Usage Table for USB / 35 -> Keyboard Grave Accent and Tilde
     }
     BUTTON_ORDER = {
         "G1": 0,
@@ -160,22 +187,22 @@ class LogitechG600Profile:
         self._dpi_shift = 0x04
         self._dpi_default = 2  # 1200 dpi
         self._dpis = [3200 // 50, 2000 // 50, 1200 // 50, 400 // 50]
-        self._buttons = [] # tuples (code, modifier, value) 
-        # code can be 
+        self._buttons = []  # tuples (code, modifier, value)
+        # code can be
         # 0x00 regular keyboard key from HID Usage Table 0x07 Keyboard usage
         # 0x01 button 1
         # 0x02 button 2
         # 0x03 button 3
         # 0x04 button 4
         # 0x05 button 5
-        # 0x11 DPI resolution up 
+        # 0x11 DPI resolution up
         # 0x12 DPI resolution down
         # 0x13 resolution cycle
         # 0x14 profile cycle
         # 0x15 resolution alternate
         # 0x17 second mode
 
-        for i in range(20):
+        for _ in range(20):
             self._buttons.append((0, 0, 0x1E))
 
         # default mappings from https://www.logitech.com/assets/44964/3/g600-mmo-gaming-mouse-quickstart-guide.pdf
@@ -227,10 +254,9 @@ class LogitechG600Profile:
         to_return.append(self._dpi_shift)
         to_return.append(self._dpi_default)
         to_return.extend(self._dpis)
-        to_return.extend([0 for _ in range(6)])  # Fill with 6 zeroes 
+        to_return.extend([0 for _ in range(6)])  # Fill with 6 zeroes
         to_return.append(2)
         to_return.extend([0 for _ in range(6)])  # Fill with 6 zeroes
-
 
         # Section with all the regular buttons (no G-shift)
         for button in self._buttons:
@@ -293,60 +319,20 @@ class LogitechG600Profile:
             )
         self._dpi_default = self._dpis.index(d)
 
-    @property
-    def dpi1(self) -> int:
-        return self._dpis[0] * 50
+    def get_dpi(self, slot: int) -> int:
+        """Return DPI for slot 1-4 in real dpi (already multiplied by 50)."""
+        return self._dpis[slot - 1] * 50
 
-    @dpi1.setter
-    def dpi1(self, d: int) -> None:
+    def set_dpi(self, slot: int, d: int) -> None:
+        """Set DPI for slot 1-4. ``d`` is real dpi (200-8200, multiple of 50)."""
         if d not in range(200, 8201, 50):
-            raise ValueError("Invalid DPI1 value %d" % d)
-        self._dpis[0] = d // 50
-
-    @property
-    def dpi2(self) -> int:
-        return self._dpis[1] * 50
-
-    @dpi2.setter
-    def dpi2(self, d: int) -> None:
-        if d not in range(200, 8201, 50):
-            raise ValueError("Invalid DPI2 value %d" % d)
-        self._dpis[1] = d // 50
-
-    @property
-    def dpi3(self) -> int:
-        return self._dpis[2] * 50
-
-    @dpi3.setter
-    def dpi3(self, d: int) -> None:
-        if d not in range(200, 8201, 50):
-            raise ValueError("Invalid DPI3 value %d" % d)
-        self._dpis[2] = d // 50
-
-    @property
-    def dpi4(self) -> int:
-        return self._dpis[3] * 50
-
-    @dpi4.setter
-    def dpi4(self, d: int) -> None:
-        if d not in range(200, 8201, 50):
-            raise ValueError("Invalid DPI4 value %d" % d)
-        self._dpis[3] = d // 50
-
-    @property
-    def left_click(self) -> tuple:
-        return self._left_click
-
-    @left_click.setter
-    def left_click(self, value: str) -> None:
-        if value not in LogitechG600Profile.NAME_TO_CODE_MODIFIER_KEY:
-            raise ValueError("Invalid left click value %s" % value)
-        self._left_click = LogitechG600Profile.NAME_TO_CODE_MODIFIER_KEY[value]
+            raise ValueError("Invalid DPI%d value %d" % (slot, d))
+        self._dpis[slot - 1] = d // 50
 
     def get_button(self, button_name: str) -> tuple:
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
-            raise ValueError("Invalid button name %s" % button_name)
+            raise ValueError(f"Invalid button name {button_name}")
         return self._buttons[index]
 
     def set_button(self, button_name: str, value: tuple[int, int, int] | str) -> None:
@@ -357,13 +343,13 @@ class LogitechG600Profile:
         code, modifier, key = value
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
-            raise ValueError("Invalid button name %s" % button_name)
+            raise ValueError(f"Invalid button name {button_name}")
         self._buttons[index] = (code, modifier, key)
 
     def get_gshift_button(self, button_name: str) -> tuple:
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
-            raise ValueError("Invalid button name %s" % button_name)
+            raise ValueError(f"Invalid button name {button_name}")
         return self._gshift_buttons[index]
 
     def set_gshift_button(
@@ -374,7 +360,7 @@ class LogitechG600Profile:
         code, modifier, key = value
         index = self.BUTTON_ORDER.get(button_name.upper(), None)
         if index is None:
-            raise ValueError("Invalid button name %s" % button_name)
+            raise ValueError(f"Invalid button name {button_name}")
         self._gshift_buttons[index] = (code, modifier, key)
 
     @property
@@ -384,10 +370,10 @@ class LogitechG600Profile:
     @gshift_color.setter
     def gshift_color(self, color: tuple) -> None:
         if len(color) != 3:
-            raise ValueError("Invalid color %s" % color)
+            raise ValueError(f"Invalid color {color}")
         for c in color:
             if c not in range(256):
-                raise ValueError("Invalid value %s in color %s" % (c, color))
+                raise ValueError(f"Invalid value {c} in color {color}")
         self._gshift_color = color
 
     @property
@@ -397,25 +383,26 @@ class LogitechG600Profile:
     @color.setter
     def color(self, color: tuple) -> None:
         if len(color) != 3:
-            raise ValueError("Invalid color %s" % color)
+            raise ValueError(f"Invalid color {color}")
         for c in color:
             if c not in range(256):
-                raise ValueError("Invalid value %s in color %s" % (c, color))
+                raise ValueError(f"Invalid value {c} in color {color}")
         self.led_red, self.led_green, self.led_blue = color
 
-    # Seconds to wait after opening before sending a report: the device may
-    # still be busy applying a previous profile write.
-    _OPEN_SETTLE_SECONDS = 2
+    # Default seconds to wait after opening before sending a report: the device
+    # may still be busy applying a previous profile write.
+    DEFAULT_SETTLE_SECONDS = 2
 
-    def _open_device(self) -> hid.device:
+    @staticmethod
+    def open_device(settle_seconds: float = DEFAULT_SETTLE_SECONDS) -> "hid.device":
         print("Opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
         try:
             h = hid.device()
             h.open(0x046D, 0xC24A)  # Logitech:0x046d G600:0xC24A
-            print("Manufacturer: %s" % h.get_manufacturer_string())
-            print("Product: %s" % h.get_product_string())
-            print("Serial No: %s" % h.get_serial_number_string())
-            time.sleep(self._OPEN_SETTLE_SECONDS)
+            print(f"Manufacturer: {h.get_manufacturer_string()}")
+            print(f"Product: {h.get_product_string()}")
+            print(f"Serial No: {h.get_serial_number_string()}")
+            time.sleep(settle_seconds)
             return h
         except OSError:
             print("error opening device vendor 0x046D (Logitech) product 0xC24A (G600)")
@@ -425,9 +412,24 @@ class LogitechG600Profile:
             )
             raise
 
-    def write_to_device(self):
-        h = self._open_device()
+    def _with_handle(self, handle, settle_seconds: float, fn):
+        """Run ``fn(handle)`` against an open device.
+
+        If ``handle`` is given it is reused and left open (the caller owns its
+        lifecycle). Otherwise a fresh handle is opened and closed around ``fn``.
+        """
+        if handle is not None:
+            return fn(handle)
+        h = self.open_device(settle_seconds)
         try:
+            return fn(h)
+        finally:
+            h.close()
+
+    def write_to_device(
+        self, handle=None, settle_seconds: float = DEFAULT_SETTLE_SECONDS
+    ) -> None:
+        def _write(h):
             print("writing profile", self.profile_number)
             rc = h.send_feature_report(self.feature_report())
             if rc == -1:
@@ -439,13 +441,15 @@ class LogitechG600Profile:
             print(
                 "Successfully wrote profile %d (%d bytes)" % (self.profile_number, rc)
             )
-        finally:
-            h.close()
 
-    def set_as_active_profile(self):
+        self._with_handle(handle, settle_seconds, _write)
+
+    def set_as_active_profile(
+        self, handle=None, settle_seconds: float = DEFAULT_SETTLE_SECONDS
+    ) -> None:
         print("Set profile %d as active profile" % self.profile_number)
-        h = self._open_device()
-        try:
+
+        def _activate(h):
             rc = h.send_feature_report(
                 [0xF0, 0x80 | (self.profile_number << 4), 0x00, 0x00]
             )
@@ -457,8 +461,8 @@ class LogitechG600Profile:
                 raise OSError(
                     "error setting profile %d as active" % self.profile_number
                 )
-        finally:
-            h.close()
+
+        self._with_handle(handle, settle_seconds, _activate)
 
     def __repr__(self):
         return "LogitechG600Profile(%d)" % self.profile_number
@@ -469,10 +473,10 @@ class LogitechG600Profile:
         to_return.append(
             "RGB (%d,%d,%d)" % (self.led_red, self.led_green, self.led_blue)
         )
-        to_return.append("LED effect (%s)" % (self.get_led_effect_string()))
+        to_return.append(f"LED effect ({self.get_led_effect_string()})")
         to_return.append("LED duration (%d seconds)" % (self.led_duration))
         to_return.append(
-            "Frequency %s Hz (0x%02X)" % (self.frequency, self.frequency_to_byte())
+            f"Frequency {self.frequency} Hz (0x{self.frequency_to_byte():02X})"
         )
         to_return.append(
             "DPI Shift %4d dpi (0x%02X)" % (self.dpi_shift, self._dpi_shift)
@@ -480,10 +484,11 @@ class LogitechG600Profile:
         to_return.append(
             "DPI Default %4ddpi (0x%02X)" % (self.dpi_default, self._dpi_default)
         )
-        to_return.append("DPI1 %4ddpi (0x%02X)" % (self.dpi1, self._dpis[0]))
-        to_return.append("DPI2 %4ddpi (0x%02X)" % (self.dpi2, self._dpis[1]))
-        to_return.append("DPI3 %4ddpi (0x%02X)" % (self.dpi3, self._dpis[2]))
-        to_return.append("DPI4 %4ddpi (0x%02X)" % (self.dpi4, self._dpis[3]))
+        for slot in range(1, 5):
+            to_return.append(
+                "DPI%d %4ddpi (0x%02X)"
+                % (slot, self.get_dpi(slot), self._dpis[slot - 1])
+            )
         labels = {1: "Left Click   ", 2: "Right Click  "}
         for i in range(1, 21):
             label = labels.get(i, "             ")
@@ -491,7 +496,7 @@ class LogitechG600Profile:
                 "%sG%-2d 0x%02X 0x%02X 0x%02X"
                 % ((label, i) + self.get_button("G%d" % i))
             )
-        to_return.append("G-Shift color %s" % (self.gshift_color,))
+        to_return.append(f"G-Shift color {self.gshift_color}")
         for i in range(1, 21):
             label = labels.get(i, "             ")
             to_return.append(
@@ -501,10 +506,9 @@ class LogitechG600Profile:
         return "\n".join(to_return)
 
 
-
 def build_profiles() -> list[LogitechG600Profile]:
-    print('MEH', f'{LogitechG600Profile.MEH:02x}')
-    print('HYPER', f'{LogitechG600Profile.HYPER:02x}')
+    print("MEH", f"{LogitechG600Profile.MEH:02x}")
+    print("HYPER", f"{LogitechG600Profile.HYPER:02x}")
     profile0 = LogitechG600Profile(0)
     profile0.color = (255, 0, 0)
     profile0.gshift_color = (0, 255, 255)
@@ -517,15 +521,21 @@ def build_profiles() -> list[LogitechG600Profile]:
     profile0.set_button("g5", value=(0, 0, 0x80))  # keyboard volume up
     profile0.set_button("g7", value="RESOLUTION_CYCLE_UP")  # DPI cycle
     profile0.set_button("g8", value="PROFILE_CYCLE_UP")  # profile cycle up
-    profile0.set_button("g9", value="CTRL+CMD+SHIFT+4")  # macOS screenshot of selected area to clipboard
+    profile0.set_button(
+        "g9", value="CTRL+CMD+SHIFT+4"
+    )  # macOS screenshot of selected area to clipboard
     profile0.set_button("g10", value="CMD+C")  # Cmd + C (copy)
     profile0.set_button("g11", value="CMD+SHIFT+V")  # KM Smart Paste
     profile0.set_button("g12", value="HYPER+4")  # hyper + 4
     profile0.set_button("g13", value="HYPER+5")  # hyper + 5
     profile0.set_button("g14", value="HYPER+6")  # hyper + 6
     profile0.set_button("g15", value="HYPER+7")  # hyper + 7
-    profile0.set_button("g16", value="CTRL+LEFT")  # Mission Control > Previous desktop space
-    profile0.set_button("g17", value="CTRL+RIGHT")  # Mission Control > Next desktop space
+    profile0.set_button(
+        "g16", value="CTRL+LEFT"
+    )  # Mission Control > Previous desktop space
+    profile0.set_button(
+        "g17", value="CTRL+RIGHT"
+    )  # Mission Control > Next desktop space
     profile0.set_button("g18", value="HYPER+0")  # hyper + 0
     profile0.set_button("g19", value="HYPER+MINUS")  # hyper + -
     profile0.set_button("g20", value="HYPER+EQUAL")  # hyper + =
@@ -553,24 +563,87 @@ def build_profiles() -> list[LogitechG600Profile]:
     return [profile0, profile1, profile2]
 
 
-def main() -> int:
-    profiles = build_profiles()
-    try:
-        for profile in profiles:
-            profile.write_to_device()
-            print("Wrote profile", profile.profile_number)
-            print("Color (R,G,B): ", profile.color)
-    except OSError as e:
-        print(e)
+class Settings(BaseSettings):
+    """Command-line settings for writing G600 profiles.
+
+    Values can be passed as CLI flags (e.g. ``--profiles 0 1`` or
+    ``--reuse_connection true``) or via ``G600_``-prefixed environment variables.
+    """
+
+    model_config = SettingsConfigDict(
+        cli_parse_args=True,
+        cli_prog_name="write_logitech_g600_profiles",
+        env_prefix="G600_",
+    )
+
+    profiles: list[int] = Field(
+        default=[0, 1, 2],
+        description="Which profile numbers (0-2) to write to the device.",
+    )
+    active_profile: int | None = Field(
+        default=0,
+        description="Profile to leave active after writing, or null to leave unchanged.",
+    )
+    reuse_connection: bool = Field(
+        default=False,
+        description=(
+            "Open the device once and reuse the handle for all operations. "
+            "Some setups/firmware reject reused handles; off by default opens a "
+            "fresh handle per operation."
+        ),
+    )
+    settle_seconds: float = Field(
+        default=LogitechG600Profile.DEFAULT_SETTLE_SECONDS,
+        description="Seconds to wait after opening the device before sending a report.",
+    )
+
+
+def run(settings: Settings) -> int:
+    all_profiles = {p.profile_number: p for p in build_profiles()}
+
+    selected: list[LogitechG600Profile] = []
+    for number in settings.profiles:
+        if number not in all_profiles:
+            print("Invalid profile number %d (expected 0, 1 or 2)" % number)
+            return 1
+        selected.append(all_profiles[number])
+
+    if (
+        settings.active_profile is not None
+        and settings.active_profile not in all_profiles
+    ):
+        print(
+            "Invalid active profile %d (expected 0, 1 or 2)" % settings.active_profile
+        )
         return 1
 
-    # Only profile0 is fully configured, so leave it as the active profile.
+    handle = None
     try:
-        profiles[0].set_as_active_profile()
+        if settings.reuse_connection:
+            handle = LogitechG600Profile.open_device(settings.settle_seconds)
+
+        for profile in selected:
+            profile.write_to_device(
+                handle=handle, settle_seconds=settings.settle_seconds
+            )
+            print("Wrote profile", profile.profile_number)
+            print("Color (R,G,B): ", profile.color)
+
+        if settings.active_profile is not None:
+            all_profiles[settings.active_profile].set_as_active_profile(
+                handle=handle, settle_seconds=settings.settle_seconds
+            )
     except OSError as e:
         print(e)
         return 1
+    finally:
+        if handle is not None:
+            handle.close()
     return 0
+
+
+def main() -> int:
+    return run(Settings())
 
 
 if __name__ == "__main__":
