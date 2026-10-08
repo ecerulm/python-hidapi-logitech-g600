@@ -84,6 +84,7 @@ class LogitechG600Profile:
         "HYPER+7": (0x00, HYPER, 0x24),
         "MEH+7": (0x00, MEH, 0x24),
         "CTRL+ALT+CMD+7": (0x00, LEFT_CTRL | LEFT_ALT | LEFT_CMD, 0x24),
+        "CTRL+ALT+7": (0x00, LEFT_CTRL | LEFT_ALT, 0x24),
         "KEY_8": (0x00, 0x00, 0x25),
         "HYPER+8": (0x00, HYPER, 0x25),
         "MEH+8": (0x00, MEH, 0x25),
@@ -547,7 +548,7 @@ def build_profiles() -> list[LogitechG600Profile]:
     profile0.set_gshift_button("g12", value="MEH+4")  # meh + 4
     profile0.set_gshift_button("g13", value="MEH+5")  # meh + 5
     profile0.set_gshift_button("g14", value="MEH+6")  # meh + 6
-    profile0.set_gshift_button("g15", value="MEH+7")  # meh + 7
+    profile0.set_gshift_button("g15", value="CTRL+ALT+7")  # Next track via Shortcuts
     profile0.set_gshift_button("g16", value="MEH+8")  # meh + 8
     profile0.set_gshift_button("g17", value="MEH+9")  # meh + 9
     profile0.set_gshift_button("g18", value="MEH+0")  # meh + 0

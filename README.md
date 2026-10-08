@@ -168,7 +168,7 @@ for media keys
 One solution it's not to use those media keys at all: map G15 to a regular key
 combination and let other software turn that into Play/Pause.
 
-## G15 as Play/Pause with Shortcuts.app
+## G15 as Play/Pause (and G-Shift G15 as Next) with Shortcuts.app
 
 Profile 0 maps G15 to `CTRL+ALT+CMD+7` (`⌃⌥⌘7`). On the Mac, the built-in
 Shortcuts.app turns that into Play/Pause, no third-party software needed:
@@ -179,8 +179,15 @@ Shortcuts.app turns that into Play/Pause, no third-party software needed:
 2. In the shortcut details, "Add Keyboard Shortcut" and press G15 to record
    `⌃⌥⌘7`.
 
+G-Shift + G15 is mapped to `CTRL+ALT+7` (`⌃⌥7`) for "Next song": create a
+second shortcut with the media action that skips to the next track and record
+G-Shift + G15 as its keyboard shortcut.
+
 Don't use Shift in the combination (e.g. `HYPER+7`): macOS records
-`⌃⌥⇧⌘7` as `⌃⌥⌘&`, and that hotkey doesn't trigger the shortcut.
+`⌃⌥⇧⌘7` as `⌃⌥⌘&`, and that hotkey doesn't trigger the shortcut. Other Mac
+apps have the same Shift+number problem (e.g.
+[Krita](https://mail.kde.org/pipermail/kde-mac/2023-August/008969.html),
+[XnView](https://newsgroup.xnview.com/viewtopic.php?p=186352)).
 
 
 # How to run

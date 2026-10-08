@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - Profile 0 G15 sends `CTRL+ALT+CMD+7` instead of `HYPER+7`, so Shortcuts.app can bind it to Play/Pause (documented in the README).
+- Profile 0 G-Shift G15 sends `CTRL+ALT+7` instead of `MEH+7` (no Shift), for a Shortcuts.app "Next song" binding.
 
 ## 2026-06-05
 
