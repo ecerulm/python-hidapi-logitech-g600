@@ -180,8 +180,9 @@ Shortcuts.app turns that into Play/Pause, no third-party software needed:
    `⌃⌥⌘7`.
 
 G-Shift + G15 is mapped to `CTRL+ALT+7` (`⌃⌥7`) for "Next song": create a
-second shortcut with the media action that skips to the next track and record
-G-Shift + G15 as its keyboard shortcut.
+second shortcut (mine is called "Next song for Logitech G600 mouse") with the
+single media action "Skip forward on Mac", and record G-Shift + G15 as its
+keyboard shortcut.
 
 Don't use Shift in the combination (e.g. `HYPER+7`): macOS records
 `⌃⌥⇧⌘7` as `⌃⌥⌘&`, and that hotkey doesn't trigger the shortcut. Other Mac
