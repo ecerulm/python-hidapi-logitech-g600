@@ -165,9 +165,22 @@ It's not clear how to map that to the button definition in the USB feature repor
 `code=0x00` it's used for regular keys but I can't find what code I need to use 
 for media keys
 
-One solution it's not to use those media keys at all, and use other software
-like Keyboard Maestro. You can map HYPER+7 to G15 and let Keyboard Maestro to 
-map HYPER+7 to Play/Pause, etc.
+One solution it's not to use those media keys at all: map G15 to a regular key
+combination and let other software turn that into Play/Pause.
+
+## G15 as Play/Pause with Shortcuts.app
+
+Profile 0 maps G15 to `CTRL+ALT+CMD+7` (`⌃⌥⌘7`). On the Mac, the built-in
+Shortcuts.app turns that into Play/Pause, no third-party software needed:
+
+1. In Shortcuts.app, create a shortcut (mine is called
+   "Play/Pause for Logitech G600 mouse") with the single media action
+   "Play/Pause on Mac". No JavaScript/AppleScript needed.
+2. In the shortcut details, "Add Keyboard Shortcut" and press G15 to record
+   `⌃⌥⌘7`.
+
+Don't use Shift in the combination (e.g. `HYPER+7`): macOS records
+`⌃⌥⇧⌘7` as `⌃⌥⌘&`, and that hotkey doesn't trigger the shortcut.
 
 
 # How to run

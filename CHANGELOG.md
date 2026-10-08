@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Changed
+- Profile 0 G15 sends `CTRL+ALT+CMD+7` instead of `HYPER+7`, so Shortcuts.app can bind it to Play/Pause (documented in the README).
+
 ## 2026-06-05
 
 ### Added

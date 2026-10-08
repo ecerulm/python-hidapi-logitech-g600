@@ -83,6 +83,7 @@ class LogitechG600Profile:
         "KEY_7": (0x00, 0x00, 0x24),
         "HYPER+7": (0x00, HYPER, 0x24),
         "MEH+7": (0x00, MEH, 0x24),
+        "CTRL+ALT+CMD+7": (0x00, LEFT_CTRL | LEFT_ALT | LEFT_CMD, 0x24),
         "KEY_8": (0x00, 0x00, 0x25),
         "HYPER+8": (0x00, HYPER, 0x25),
         "MEH+8": (0x00, MEH, 0x25),
@@ -529,7 +530,8 @@ def build_profiles() -> list[LogitechG600Profile]:
     profile0.set_button("g12", value="HYPER+4")  # hyper + 4
     profile0.set_button("g13", value="HYPER+5")  # hyper + 5
     profile0.set_button("g14", value="HYPER+6")  # hyper + 6
-    profile0.set_button("g15", value="HYPER+7")  # hyper + 7
+    # No Shift: macOS records Shift+7 as "&", which breaks Shortcuts hotkeys
+    profile0.set_button("g15", value="CTRL+ALT+CMD+7")  # Play/Pause via Shortcuts
     profile0.set_button(
         "g16", value="CTRL+LEFT"
     )  # Mission Control > Previous desktop space
